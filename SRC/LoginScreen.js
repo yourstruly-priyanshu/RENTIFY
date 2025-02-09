@@ -37,9 +37,13 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = () => {
     setError('');
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => console.log("Logged in successfully"))
+      .then(() => {
+        console.log("Logged in successfully");
+        navigation.replace("Home");  // 👈 This ensures user is taken to HomeScreen
+      })
       .catch(error => setError(error.message));
   };
+  
 
   return (
     <Animated.View style={[styles.container, { backgroundColor: interpolateColor }]}>
