@@ -27,7 +27,7 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.appName}>Rental Hub</Text>
+        <Text style={styles.appName}>RentifyPro</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
           <Text style={styles.profileButton}>Profile</Text>
         </TouchableOpacity>
