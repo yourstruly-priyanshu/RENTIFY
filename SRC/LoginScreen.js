@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, TouchableOpacity, StyleSheet, Text, View, Animated, Dimensions, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import { Video } from 'expo-av';
+import { TextInput, TouchableOpacity, StyleSheet, Text, View, Animated, Dimensions, KeyboardAvoidingView, ScrollView, Platform, Image } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase_config';
 
@@ -29,10 +28,10 @@ export default function LoginScreen({ navigation }) {
     ).start();
   }, []);
 
-  const interpolateColor = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#000428', '#004e92'],
-  });
+ const interpolateColor = animatedValue.interpolate({
+   inputRange: [0, 1],
+   outputRange: ['#E6C79F', '#FFE4C4'],
+ });
 
   const handleLogin = () => {
     setError('');
@@ -43,19 +42,18 @@ export default function LoginScreen({ navigation }) {
       })
       .catch(error => setError(error.message));
   };
-  
 
   return (
     <Animated.View style={[styles.container, { backgroundColor: interpolateColor }]}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Video
-            source={require('./assets/logo.mp4')}
-            style={styles.video}
-            shouldPlay
-            isLooping
-            resizeMode="contain"
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              source={require('./assets/logo.png')} // Path to your PNG image
+              style={styles.image}
+              resizeMode="contain" // Adjust the image's size to fit the container
+            />
+          </View>
 
           <Text style={styles.title}>Login</Text>
           <Text style={styles.subtitle}>Sign in to continue.</Text>
@@ -108,25 +106,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexGrow: 1,
   },
-  video: {
-    width: 200,
-    height: 300,
-    marginBottom: 10,
+  imageContainer: {
+    width: width * 0.6, // Width of the image container (60% of the screen width)
+    height: height * 0.25, // Height of the image container (25% of the screen height)
+    marginBottom: 20, // Space below the image
+    justifyContent: 'center', // Center the image inside the container
+    alignItems: 'center', // Center the image inside the container
+  },
+  image: {
+    width: '100%', // Make the image fill the container width
+    height: '100%', // Make the image fill the container height
+    borderRadius: 20, // Optional: Add rounded corners to the image
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000', // Changed to black
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#ddd',
+    color: '#000', // Changed to black
     marginBottom: 10,
   },
   label: {
     alignSelf: 'flex-start',
-    color: '#fff',
+    color: '#000', // Changed to black
     marginBottom: 5,
   },
   input: {
@@ -136,18 +141,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#fff',
+    color: '#000', // Changed to black
   },
   button: {
     width: '100%',
     paddingVertical: 15,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: '#000', // Changed to black
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000', // Changed to black
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -157,7 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: '#fff',
+    color: '#000', // Changed to black
     marginTop: 15,
     fontSize: 16,
     textDecorationLine: 'underline',

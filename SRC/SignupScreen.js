@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput, TouchableOpacity, StyleSheet, Text, View, Animated, Dimensions, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase_config'; // import your firebase_config
@@ -28,10 +28,10 @@ export default function SignupScreen({ navigation }) {
   }, []);
 
 
-  const interpolateColor = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#000428', '#004e92'],
-  });
+   const interpolateColor = animatedValue.interpolate({
+     inputRange: [0, 1],
+     outputRange: ['#E6C79F', '#FFE4C4'],
+   });
 
   const handleSignup = () => {
     setError('');
@@ -99,17 +99,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000', // Changed to black
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#ddd',
+    color: '#000', // Changed to black
     marginBottom: 20,
   },
   label: {
     alignSelf: 'flex-start',
-    color: '#fff',
+    color: '#000', // Changed to black
     marginBottom: 5,
   },
   input: {
@@ -119,18 +119,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 20,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#fff',
+    color: '#000', // Changed to black
   },
   button: {
     width: '100%',
     paddingVertical: 15,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: '#000', // Changed to black
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000', // Changed to black
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: '#fff',
+    color: '#000', // Changed to black
     marginTop: 15,
     fontSize: 16,
     textDecorationLine: 'underline',

@@ -8,7 +8,8 @@ import ForgotPasswordScreen from "./ForgotPasswordScreen";
 import HomeScreen from "./HomeScreen";
 import ProductScreen from "./ProductScreen";
 import PaymentScreen from "./PaymentScreen";
-import ListProduct from "./ListProductScreen";
+import Profile from "./Profile.js";
+import ListProduct from "./ListProductScreen"
 
 const Stack = createStackNavigator();
 
@@ -19,7 +20,7 @@ export default function Navigation() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-to       setUser(currentUser);
+      setUser(currentUser);
       setLoading(false);
     });
     return unsubscribe; // Clean up the listener when component unmounts
