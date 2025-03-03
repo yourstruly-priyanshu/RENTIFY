@@ -122,7 +122,7 @@ export default function HomeScreen({ navigation }) {
           <Icon name="user" size={28} color="black" />
           <Text style={[styles.navText, { color: "black" }]}>Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("ChatScreen")}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Chat")}>
           <Icon name="comments" size={28} color="black" />
           <Text style={[styles.navText, { color: "black" }]}>Chat</Text>
         </TouchableOpacity>

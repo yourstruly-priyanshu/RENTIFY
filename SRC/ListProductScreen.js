@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "./firebase_config"; // Import Firestore instance
 
@@ -49,6 +49,12 @@ export default function ListProductScreen({ navigation }) {
       <TextInput style={styles.input} placeholder="Category" value={product.category} onChangeText={(value) => handleChange("category", value)} />
       <TextInput style={styles.input} placeholder="Price Per Day" keyboardType="numeric" value={product.pricePerDay} onChangeText={(value) => handleChange("pricePerDay", value)} />
       <TextInput style={styles.input} placeholder="Image URL" value={product.imageUrl} onChangeText={(value) => handleChange("imageUrl", value)} />
+      
+      {/* Image Preview */}
+      {product.imageUrl ? (
+        <Image source={{ uri: product.imageUrl }} style={styles.imagePreview} />
+      ) : null}
+
       <TextInput style={styles.input} placeholder="Description" value={product.description} onChangeText={(value) => handleChange("description", value)} />
       <TextInput style={styles.input} placeholder="Location" value={product.location} onChangeText={(value) => handleChange("location", value)} />
 
@@ -78,6 +84,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
+    marginBottom: 15,
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
     marginBottom: 15,
   },
   button: {
