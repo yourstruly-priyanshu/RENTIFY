@@ -1,106 +1,212 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "./firebase_config"; // Import Firestore instance
+import React, { useState, useEffect } from 'react';
+import { TextInput, TouchableOpacity, StyleSheet, Text, View, Image, Alert, ScrollView } from 'react-native';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { auth, db, storage } from './firebase_config';
+import { doc, setDoc, collection } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export default function ListProductScreen({ navigation }) {
-  const [product, setProduct] = useState({
-    name: "",
-    category: "",
-    pricePerDay: "",
-    imageUrl: "",
-    description: "",
-    location: "",
-    available: true,
-  });
+export default function ProductScreen({ navigation }) {
+  const [user, setUser] = useState(null);
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [pricePerDay, setPricePerDay] = useState('');
+  const [images, setImages] = useState([]);
 
-  const handleChange = (field, value) => {
-    setProduct({ ...product, [field]: value });
-  };
+  // Check if the user is logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleSubmit = async () => {
-    // Validate required fields
-    if (!product.name || !product.category || !product.pricePerDay || !product.imageUrl || !product.description || !product.location) {
-      Alert.alert("Error", "Please fill in all fields.");
+  // Save the product to Firestore
+  const handleSave = async () => {
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in to list a product.');
+      navigation.navigate('Login');
+      return;
+    }
+
+    if (!name || !category || !description || !location || !pricePerDay) {
+      Alert.alert('Error', 'Please fill in all the product details.');
       return;
     }
 
     try {
-      const collectionRef = collection(db, "rentalProducts");
-      await addDoc(collectionRef, {
-        ...product,
-        pricePerDay: Number(product.pricePerDay), // Convert price to number
+      // Save the product information
+      const productRef = doc(collection(db, 'products'));
+      await setDoc(productRef, {
+        name,
+        category,
+        description,
+        location,
+        pricePerDay,
+        images,
+        userId: user.uid, // Associate the product with the logged-in user
+        createdAt: new Date(),
       });
 
-      Alert.alert("Success", "Product listed successfully!");
-      setProduct({ name: "", category: "", pricePerDay: "", imageUrl: "", description: "", location: "", available: true });
-      navigation.navigate("Home"); // Redirect to Home after listing
+      Alert.alert('Success', 'Product listed successfully!');
+      // Reset form fields
+      setName('');
+      setCategory('');
+      setDescription('');
+      setLocation('');
+      setPricePerDay('');
+      setImages([]);
     } catch (error) {
-      console.error("Error adding product: ", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      Alert.alert('Error', 'Failed to list product.');
     }
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      await uploadImage(uri);
+    }
+  };
+
+  const uploadImage = async (uri) => {
+    if (images.length >= 5) {
+      Alert.alert('Error', 'You can only upload up to 5 images.');
+      return;
+    }
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `product_images/${user.uid}/${Date.now()}`);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    setImages([...images, downloadURL]);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>List Your Product for Rent</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      {user ? (
+        <>
+          <Text style={styles.title}>Product Listing</Text>
 
-      <TextInput style={styles.input} placeholder="Product Name" value={product.name} onChangeText={(value) => handleChange("name", value)} />
-      <TextInput style={styles.input} placeholder="Category" value={product.category} onChangeText={(value) => handleChange("category", value)} />
-      <TextInput style={styles.input} placeholder="Price Per Day" keyboardType="numeric" value={product.pricePerDay} onChangeText={(value) => handleChange("pricePerDay", value)} />
-      <TextInput style={styles.input} placeholder="Image URL" value={product.imageUrl} onChangeText={(value) => handleChange("imageUrl", value)} />
-      
-      {/* Image Preview */}
-      {product.imageUrl ? (
-        <Image source={{ uri: product.imageUrl }} style={styles.imagePreview} />
-      ) : null}
+          {/* Display uploaded images */}
+          <ScrollView horizontal>
+            {images.map((pic, index) => (
+              <Image key={index} source={{ uri: pic }} style={styles.productImage} />
+            ))}
+          </ScrollView>
 
-      <TextInput style={styles.input} placeholder="Description" value={product.description} onChangeText={(value) => handleChange("description", value)} />
-      <TextInput style={styles.input} placeholder="Location" value={product.location} onChangeText={(value) => handleChange("location", value)} />
+          {/* Upload Image Button */}
+          <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>
+            <Text style={styles.uploadButtonText}>Upload Image</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>List Product</Text>
-      </TouchableOpacity>
-    </View>
+          {/* Input fields */}
+          <TextInput style={styles.input} placeholder='Product Name' value={name} onChangeText={setName} />
+          <TextInput style={styles.input} placeholder='Category' value={category} onChangeText={setCategory} />
+          <TextInput style={styles.input} placeholder='Description' value={description} onChangeText={setDescription} />
+          <TextInput style={styles.input} placeholder='Location' value={location} onChangeText={setLocation} />
+          <TextInput style={styles.input} placeholder='Price Per Day' value={pricePerDay} onChangeText={setPricePerDay} keyboardType="numeric" />
+
+          {/* Save Button */}
+          <TouchableOpacity style={styles.button} onPress={handleSave}>
+            <Text style={styles.buttonText}>List Product</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View style={styles.loginBox}>
+          <Text style={styles.notLoggedInText}>You must be logged in to list a product.</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
-    backgroundColor: "#fff",
-    justifyContent: "center",
+    backgroundColor: '#f5e5d5',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: "center",
+  },
+  productImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  uploadButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  uploadButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   input: {
+    width: '90%',
     height: 50,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
   },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: '#007bff',
     padding: 15,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
+    width: '90%',
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  notLoggedInText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: 10,
+  },
+  loginBox: {
+    width: '90%',
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+  },
+  loginButtonText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

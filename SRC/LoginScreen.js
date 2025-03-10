@@ -85,7 +85,7 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
 
-          <Text style={styles.link} onPress={() => navigation.navigate('Signup')}>Sign up</Text>
+          <Text style={styles.link} onPress={() => navigation.navigate('SignupScreen')}>Sign up</Text>
 
           <Text style={styles.link} onPress={() => navigation.navigate('ForgotPassword')}>
             Forgot Password?

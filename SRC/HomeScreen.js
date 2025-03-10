@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "./firebase_config";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -8,8 +9,40 @@ export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]); // State for cart items
+  const [cartItems, setCartItems] = useState([]);
+  const [userCountry, setUserCountry] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const auth = getAuth();
 
+  // Check authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+      if (!user) {
+        fetchUserCountry();
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch user's country from ISP when logged out
+  const fetchUserCountry = async () => {
+    try {
+      const response = await fetch("http://ip-api.com/json");
+      const data = await response.json();
+      if (data.status === "success") {
+        setUserCountry(data.country); // e.g., "India"
+      } else {
+        console.error("Failed to fetch user country:", data.message);
+        setUserCountry("Unknown");
+      }
+    } catch (error) {
+      console.error("Error fetching user country:", error);
+      setUserCountry("Unknown");
+    }
+  };
+
+  // Fetch products and filter based on country if logged out
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -18,23 +51,38 @@ export default function HomeScreen({ navigation }) {
           id: doc.id,
           ...doc.data(),
         }));
-        setProducts(productList);
-        setFilteredProducts(productList);
+
+        if (!isLoggedIn && userCountry) {
+          // Filter by country extracted from location field with debugging
+          const countryFilteredProducts = productList.filter((product) => {
+            const productLocation = product.location || ""; // e.g., "Indore, India"
+            const productCountry = productLocation.split(",").pop().trim().toLowerCase(); // e.g., "india"
+            console.log(`Product: ${productLocation}, Extracted: ${productCountry}, User: ${userCountry}`);
+            return productCountry === userCountry.toLowerCase();
+          });
+          setProducts(countryFilteredProducts);
+          setFilteredProducts(countryFilteredProducts);
+        } else {
+          // Show all products if logged in or country not yet fetched
+          setProducts(productList);
+          setFilteredProducts(productList);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [isLoggedIn, userCountry]);
 
+  // Set cart icon in header
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={() => navigation.navigate("CartScreen")} style={styles.cartIconContainer}>
           <Icon name="shopping-cart" size={24} color="#fff" />
           <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>{cartItems.length}</Text> {/* Dynamic count */}
+            <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
           </View>
         </TouchableOpacity>
       ),
@@ -46,8 +94,9 @@ export default function HomeScreen({ navigation }) {
       },
       headerTintColor: "#fff",
     });
-  }, [navigation, cartItems]); // Add cartItems to dependencies
+  }, [navigation, cartItems]);
 
+  // Handle search functionality
   const handleSearch = (text) => {
     setSearchText(text);
     if (text) {
@@ -62,6 +111,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
@@ -82,7 +132,10 @@ export default function HomeScreen({ navigation }) {
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}
+            >
               <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productPrice}>${item.pricePerDay}/day</Text>
@@ -100,14 +153,21 @@ export default function HomeScreen({ navigation }) {
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}>
-              <Image source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }} style={styles.productImage} />
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}
+            >
+              <Image
+                source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }}
+                style={styles.productImage}
+              />
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productPrice}>${item.pricePerDay}/day</Text>
             </TouchableOpacity>
           )}
         />
       </View>
+
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Explore")}>
@@ -136,6 +196,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5e5d5",
     padding: 20,
+  },
+  locationText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
   },
   searchContainer: {
     flexDirection: "row",
