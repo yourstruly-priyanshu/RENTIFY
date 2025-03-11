@@ -1,90 +1,122 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform
+} from 'react-native';
+import { collection, getDocs, addDoc, orderBy, query } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from './firebase_config'; // Ensure this path is correct
 
-const ChatScreen = () => {
+const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [user, setUser] = useState(null);
+  const flatListRef = useRef(null);
 
-  // Fetch messages from Firestore
   useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
     const fetchMessages = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'chatMessages')); // Replace 'chatMessages' with your collection name
-        const messagesList = querySnapshot.docs.map((doc) => ({
+        const messagesQuery = query(collection(db, 'chatMessages'), orderBy('createdAt', 'asc'));
+        const querySnapshot = await getDocs(messagesQuery);
+        let messagesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+
+        // Ensure "Hi, I am Mariam" is always the first message
+        if (!messagesList.some(msg => msg.system)) {
+          const welcomeMessage = {
+            id: 'mariam-message',
+            text: 'Hi, I am Mariam. If you have any doubts, you can ask.',
+            createdAt: new Date(),
+            system: true, // Flag this as a system message
+          };
+          messagesList = [welcomeMessage, ...messagesList];
+        }
+
         setMessages(messagesList);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
     };
-
     fetchMessages();
-  }, []);
+  }, [user]);
 
   const handleSend = async () => {
+    if (!user) {
+      alert("Please log in to send messages.");
+      return;
+    }
+
     if (message.trim()) {
       try {
-        // Add message to Firestore
-        await addDoc(collection(db, 'chatMessages'), {
-          text: message,
-          createdAt: new Date(), // You can add a timestamp if needed
-        });
+        const newMessage = { text: message, createdAt: new Date(), userId: user.uid };
+        await addDoc(collection(db, 'chatMessages'), newMessage);
 
-        // Update local state
-        setMessages([...messages, { id: Date.now().toString(), text: message }]);
-        setMessage(''); // Clear the input field
+        setMessages([...messages, { id: Date.now().toString(), ...newMessage }]);
+        setMessage('');
+
+        // Auto-scroll to the latest message
+        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
       } catch (error) {
         console.error('Error sending message:', error);
       }
     }
   };
 
-  const renderMessage = ({ item }) => (
-    <View style={styles.messageContainer}>
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
-  );
+  const renderMessage = ({ item }) => {
+    const isSystemMessage = item.system;
+    const isUserMessage = item.userId === user?.uid;
 
-  const handleAddChat = () => {
-    Alert.alert("Add Chat", "Functionality to add a new chat will be implemented.");
+    return (
+      <View style={[styles.messageContainer,
+        isSystemMessage ? styles.systemMessage : isUserMessage ? styles.userMessage : styles.otherMessage,
+        { alignSelf: isUserMessage ? 'flex-end' : 'flex-start' }
+      ]}>
+        <Text style={styles.messageText}>{item.text}</Text>
+      </View>
+    );
   };
 
-  const handlePreviousChats = () => {
-    Alert.alert("Previous Chats", "Functionality to view previous chats will be implemented.");
-  };
-
-  const handleNewUpdates = () => {
-    Alert.alert("New Updates", "Functionality to view new updates will be implemented.");
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Let's chit-chat</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleAddChat}>
-          <Text style={styles.buttonText}>Add Chat</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handlePreviousChats}>
-          <Text style={styles.buttonText}>Previous Chats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleNewUpdates}>
-          <Text style={styles.buttonText}>New Updates</Text>
+  if (!user) {
+    return (
+      <View style={styles.notLoggedInContainer}>
+        <Text style={styles.notLoggedInText}>You must log in to access chat.</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
+          <Text style={styles.loginButtonText}>Go to Login</Text>
         </TouchableOpacity>
       </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       <FlatList
+        ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
         style={styles.messageList}
       />
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
+          placeholderTextColor="#777"
           value={message}
           onChangeText={setMessage}
         />
@@ -92,75 +124,107 @@ const ChatScreen = () => {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
     backgroundColor: '#f5e5d5',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
+  notLoggedInContainer: {
     flex: 1,
-    marginHorizontal: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5e5d5',
   },
-  buttonText: {
+  notLoggedInText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  loginButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 16,
   },
   messageList: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 15,
   },
   messageContainer: {
-    marginVertical: 5,
+    maxWidth: '75%',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 15,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  systemMessage: {
+    backgroundColor: '#007bff',
+    alignSelf: 'flex-start',
+  },
+  userMessage: {
+    backgroundColor: '#4CAF50', // Green color for user's messages
+    alignSelf: 'flex-end',
+  },
+  otherMessage: {
     backgroundColor: '#fff',
     alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
+    color: '#000',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
     backgroundColor: '#fff',
+    padding: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   input: {
     flex: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginRight: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    height: 50,
+    fontSize: 16,
+    color: '#000',
   },
   sendButton: {
     backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginLeft: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
   },
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
