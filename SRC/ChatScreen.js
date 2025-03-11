@@ -28,7 +28,7 @@ const ChatScreen = ({ navigation }) => {
       try {
         const messagesQuery = query(collection(db, 'chatMessages'), orderBy('createdAt', 'asc'));
         const querySnapshot = await getDocs(messagesQuery);
-        let messagesList = querySnapshot.docs.map((doc) => ({
+        const messagesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -41,7 +41,7 @@ const ChatScreen = ({ navigation }) => {
             createdAt: new Date(),
             system: true, // Flag this as a system message
           };
-          messagesList = [welcomeMessage, ...messagesList];
+          messagesList.unshift(welcomeMessage);
         }
 
         setMessages(messagesList);
@@ -63,7 +63,7 @@ const ChatScreen = ({ navigation }) => {
         const newMessage = { text: message, createdAt: new Date(), userId: user.uid };
         await addDoc(collection(db, 'chatMessages'), newMessage);
 
-        setMessages([...messages, { id: Date.now().toString(), ...newMessage }]);
+        setMessages(prevMessages => [...prevMessages, { id: Date.now().toString(), ...newMessage }]);
         setMessage('');
 
         // Auto-scroll to the latest message

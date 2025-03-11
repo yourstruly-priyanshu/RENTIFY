@@ -87,7 +87,7 @@ export default function LoginScreen({ navigation }) {
 
           <Text style={styles.link} onPress={() => navigation.navigate('SignupScreen')}>Sign up</Text>
 
-          <Text style={styles.link} onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={styles.link} onPress={() => navigation.navigate('ForgotPasswordScreen')}>
             Forgot Password?
           </Text>
         </ScrollView>
