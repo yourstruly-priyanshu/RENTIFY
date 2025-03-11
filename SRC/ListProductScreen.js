@@ -122,7 +122,7 @@ export default function ProductScreen({ navigation }) {
       ) : (
         <View style={styles.loginBox}>
           <Text style={styles.notLoggedInText}>You must be logged in to list a product.</Text>
-          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
             <Text style={styles.loginButtonText}>Go to Login</Text>
           </TouchableOpacity>
         </View>
