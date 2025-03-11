@@ -10,6 +10,7 @@ import ExploreScreen from "./ExploreScreen";
 import ChatScreen from "./ChatScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
+import ForgotPasswordScreen from "./ForgotPasswordScreen";
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -25,6 +26,7 @@ export default function Navigation() {
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: "Chat" }} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ title: "LoginScreen" }} />
         <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ title: "SignupScreen" }} />
+        <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: "ForgotPasswordScreen" }} />
 
       </Stack.Navigator>
     </NavigationContainer>
