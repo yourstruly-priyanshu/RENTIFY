@@ -10,6 +10,7 @@ const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
+  const [feedback, setFeedback] = useState(''); // State for feedback
   const flatListRef = useRef(null);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const ChatScreen = ({ navigation }) => {
         if (!messagesList.some(msg => msg.system)) {
           const welcomeMessage = {
             id: 'mariam-message',
-            text: 'Hi, I am Mariam. If you have any doubts, you can ask.',
+            text: 'Hi, I am chatbot. If you have any doubts, you can ask.',
             createdAt: new Date(),
             system: true, // Flag this as a system message
           };
@@ -71,6 +72,22 @@ const ChatScreen = ({ navigation }) => {
       } catch (error) {
         console.error('Error sending message:', error);
       }
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (feedback.trim()) {
+      try {
+        const feedbackData = { text: feedback, createdAt: new Date(), userId: user.uid };
+        await addDoc(collection(db, 'feedback'), feedbackData); // Store feedback in Firestore
+
+        setFeedback(''); // Clear feedback input
+        alert('Feedback submitted successfully!');
+      } catch (error) {
+        console.error('Error submitting feedback:', error);
+      }
+    } else {
+      alert('Please enter your feedback before submitting.');
     }
   };
 
@@ -122,6 +139,20 @@ const ChatScreen = ({ navigation }) => {
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
           <Text style={styles.sendButtonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Feedback Section */}
+      <View style={styles.feedbackContainer}>
+        <TextInput
+          style={styles.feedbackInput}
+          placeholder="Type your feedback..."
+          placeholderTextColor="#777"
+          value={feedback}
+          onChangeText={setFeedback}
+        />
+        <TouchableOpacity style={styles.feedbackButton} onPress={handleFeedbackSubmit}>
+          <Text style={styles.feedbackButtonText}>Submit Feedback</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -222,6 +253,46 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   sendButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  feedbackContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  feedbackInput: {
+    flex: 1,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    height: 50,
+    fontSize: 16,
+    color: '#000',
+  },
+  feedbackButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginLeft: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  feedbackButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
