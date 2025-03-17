@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { View, Text, FlatList, Image, TouchableOpacity, TextInput } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "./firebase_config";
 import Icon from "react-native-vector-icons/FontAwesome";
+import styles from "./HomeScreenStyles"; // Import styles from the separate file
 
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,8 @@ export default function HomeScreen({ navigation }) {
   const [userCountry, setUserCountry] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const auth = getAuth();
+
+  const categories = ["Electrics", "Furniture", "Vehicles", "Sports", "Fashion","Events"];
 
   // Check authentication state
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function HomeScreen({ navigation }) {
       const response = await fetch("http://ip-api.com/json");
       const data = await response.json();
       if (data.status === "success") {
-        setUserCountry(data.country); // e.g., "India"
+        setUserCountry(data.country);
       } else {
         console.error("Failed to fetch user country:", data.message);
         setUserCountry("Unknown");
@@ -53,17 +56,14 @@ export default function HomeScreen({ navigation }) {
         }));
 
         if (!isLoggedIn && userCountry) {
-          // Filter by country extracted from location field with debugging
           const countryFilteredProducts = productList.filter((product) => {
-            const productLocation = product.location || ""; // e.g., "Indore, India"
-            const productCountry = productLocation.split(",").pop().trim().toLowerCase(); // e.g., "india"
-            console.log(`Product: ${productLocation}, Extracted: ${productCountry}, User: ${userCountry}`);
+            const productLocation = product.location || "";
+            const productCountry = productLocation.split(",").pop().trim().toLowerCase();
             return productCountry === userCountry.toLowerCase();
           });
           setProducts(countryFilteredProducts);
           setFilteredProducts(countryFilteredProducts);
         } else {
-          // Show all products if logged in or country not yet fetched
           setProducts(productList);
           setFilteredProducts(productList);
         }
@@ -86,12 +86,8 @@ export default function HomeScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       ),
-      headerStyle: {
-        backgroundColor: "#007bff",
-      },
-      headerTitleStyle: {
-        color: "#fff",
-      },
+      headerStyle: { backgroundColor: "#007bff" },
+      headerTitleStyle: { color: "#fff" },
       headerTintColor: "#fff",
     });
   }, [navigation, cartItems]);
@@ -109,9 +105,16 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  // Filter products by category
+  const handleCategorySelect = (category) => {
+    const filtered = products.filter((product) =>
+      product.category?.toLowerCase() === category.toLowerCase()
+    );
+    setFilteredProducts(filtered.length > 0 ? filtered : products);
+  };
+
   return (
     <View style={styles.container}>
-
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
@@ -123,8 +126,24 @@ export default function HomeScreen({ navigation }) {
         />
       </View>
 
+      {/* Categories Section */}
+      <View style={styles.categoriesWrapper}>
+        <Text style={styles.categoriesTitle}>Categories</Text>
+        <View style={styles.categoriesContainer}>
+          {categories.map((category, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.categoryBox}
+              onPress={() => handleCategorySelect(category)}
+            >
+              <Text style={styles.categoryText}>{category}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       {/* Popular Items Section */}
-      <View style={styles.sectionContainer}>
+      <View style={styles.sectionWrapper}>
         <Text style={styles.sectionTitle}>Popular Items</Text>
         <FlatList
           data={filteredProducts}
@@ -136,7 +155,7 @@ export default function HomeScreen({ navigation }) {
               style={styles.productCard}
               onPress={() => navigation.navigate("Product", { productId: item.id })}
             >
-              <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+              <Image source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }} style={styles.productImage} />
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productPrice}>${item.pricePerDay}/day</Text>
             </TouchableOpacity>
@@ -145,7 +164,7 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       {/* Our Recommendations Section */}
-      <View style={styles.sectionContainer}>
+      <View style={styles.sectionWrapper}>
         <Text style={styles.sectionTitle}>Our Recommendations</Text>
         <FlatList
           data={filteredProducts}
@@ -157,10 +176,7 @@ export default function HomeScreen({ navigation }) {
               style={styles.productCard}
               onPress={() => navigation.navigate("Product", { productId: item.id })}
             >
-              <Image
-                source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }}
-                style={styles.productImage}
-              />
+              <Image source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }} style={styles.productImage} />
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productPrice}>${item.pricePerDay}/day</Text>
             </TouchableOpacity>
@@ -190,115 +206,3 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5e5d5",
-    padding: 20,
-  },
-  locationText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 10,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-    backgroundColor: "#fff",
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchBar: {
-    flex: 1,
-    height: 50,
-    fontSize: 18,
-  },
-  sectionContainer: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  productCard: {
-    width: 140,
-    height: 180,
-    padding: 10,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    alignItems: "center",
-    backgroundColor: "#fff",
-    elevation: 2,
-  },
-  productImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 5,
-    color: "black",
-  },
-  productPrice: {
-    fontSize: 12,
-    color: "#555",
-  },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 70,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderColor: "#ddd",
-    paddingVertical: 10,
-    elevation: 5,
-  },
-  navItem: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 3,
-  },
-  cartIconContainer: {
-    marginRight: 20,
-  },
-  cartBadge: {
-    position: "absolute",
-    right: -5,
-    top: -5,
-    backgroundColor: "red",
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cartBadgeText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-});
