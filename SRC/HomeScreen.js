@@ -53,14 +53,17 @@ export default function HomeScreen({ navigation }) {
         }));
 
         if (!isLoggedIn && userCountry) {
+          // Filter by country extracted from location field with debugging
           const countryFilteredProducts = productList.filter((product) => {
-            const productLocation = product.location || "";
-            const productCountry = productLocation.split(",").pop().trim().toLowerCase();
+            const productLocation = product.location || ""; // e.g., "Indore, India"
+            const productCountry = productLocation.split(",").pop().trim().toLowerCase(); // e.g., "india"
+            console.log(`Product: ${productLocation}, Extracted: ${productCountry}, User: ${userCountry}`);
             return productCountry === userCountry.toLowerCase();
           });
           setProducts(countryFilteredProducts);
           setFilteredProducts(countryFilteredProducts);
         } else {
+          // Show all products if logged in or country not yet fetched
           setProducts(productList);
           setFilteredProducts(productList);
         }
@@ -71,6 +74,27 @@ export default function HomeScreen({ navigation }) {
 
     fetchProducts();
   }, [isLoggedIn, userCountry]);
+
+  // Set cart icon in header
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={() => navigation.navigate("CartScreen")} style={styles.cartIconContainer}>
+          <Icon name="shopping-cart" size={24} color="#fff" />
+          <View style={styles.cartBadge}>
+            <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+          </View>
+        </TouchableOpacity>
+      ),
+      headerStyle: {
+        backgroundColor: "#007bff",
+      },
+      headerTitleStyle: {
+        color: "#fff",
+      },
+      headerTintColor: "#fff",
+    });
+  }, [navigation, cartItems]);
 
   // Handle search functionality
   const handleSearch = (text) => {
@@ -87,21 +111,6 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header with RENTIFY name, cart, and login button */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>RENTIFY</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity onPress={() => navigation.navigate("CartScreen")} style={styles.cartIconContainer}>
-            <Icon name="shopping-cart" size={24} color="#fff" />
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")} style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -120,12 +129,12 @@ export default function HomeScreen({ navigation }) {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id}
-          vertical
-          showsVerticalScrollIndicator={false}
+          horizontal
+          showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.productCard}
-              onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}
+              onPress={() => navigation.navigate("Product", { productId: item.id })}
             >
               <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
               <Text style={styles.productName}>{item.name}</Text>
@@ -141,12 +150,12 @@ export default function HomeScreen({ navigation }) {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id}
-          vertical
-          showsVerticalScrollIndicator={false}
+          horizontal
+          showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.productCard}
-              onPress={() => navigation.navigate("ProductScreen", { productId: item.id })}
+              onPress={() => navigation.navigate("Product", { productId: item.id })}
             >
               <Image
                 source={{ uri: item.imageUrl || "https://example.com/default-image.jpg" }}
@@ -188,31 +197,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5e5d5",
     padding: 20,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  headerButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cartIconContainer: {
-    marginRight: 20,
-  },
-  loginButton: {
-    backgroundColor: "#FFA500", // Orange color
-    padding: 10,
-    borderRadius: 5,
-  },
-  loginButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  locationText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
   },
   searchContainer: {
     flexDirection: "row",
@@ -243,7 +231,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#32CD32", // Light green color
   },
   productCard: {
     width: 140,
@@ -295,6 +282,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 3,
   },
+  cartIconContainer: {
+    marginRight: 20,
+  },
   cartBadge: {
     position: "absolute",
     right: -5,
@@ -312,4 +302,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
