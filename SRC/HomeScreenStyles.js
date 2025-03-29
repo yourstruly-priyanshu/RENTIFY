@@ -1,11 +1,13 @@
-import { StyleSheet } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, StatusBar, Platform } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
     padding: 15,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 10 : 0, // Ensure fallback value
   },
+
 
   /* 🔍 Search Bar */
   searchContainer: {
@@ -17,6 +19,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
   },
+
   searchIcon: {
     marginRight: 10,
   },
@@ -27,7 +30,7 @@ const styles = StyleSheet.create({
 
   /* 📦 Categories Section */
   categoriesWrapper: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFA500",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -45,25 +48,25 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   categoryBox: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#FFFFFF",
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 8,
+    borderRadius: 80,
     marginBottom: 10,
   },
   categoryText: {
-    color: "#fff",
+    color: "#000000",
     fontSize: 14,
     fontWeight: "bold",
   },
 
   /* 🔥 Popular Items & Recommendations */
   sectionWrapper: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFA500",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
-    elevation: 3,
+    elevation: 3, // ✅ Reduced from 100 to 3 (too high before)
   },
   sectionTitle: {
     fontSize: 18,
@@ -119,10 +122,10 @@ const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#fff",
-    paddingVertical: 15,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    backgroundColor: "#FFA500",
+    paddingVertical: 40, // Increase this value to push it down
+    borderTopLeftRadius: 100,
+    borderTopRightRadius:100,
     elevation: 5,
   },
   navItem: {

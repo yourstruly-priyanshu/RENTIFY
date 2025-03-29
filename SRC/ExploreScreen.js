@@ -14,6 +14,7 @@ const ExploreScreen = () => {
           id: doc.id,
           ...doc.data(),
         }));
+        console.log(productList); // Debugging line
         setProducts(productList);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -27,8 +28,8 @@ const ExploreScreen = () => {
     <View style={styles.productContainer}>
       <Image source={{ uri: item.imageUrl }} style={styles.productImage} /> {/* Product Image */}
       <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productDescription}>{item.description}</Text>
+        <Text style={styles.productName}>{item.name || 'Unnamed Product'}</Text>
+        <Text style={styles.productDescription}>{item.description || 'No description available.'}</Text>
         <Text style={styles.productPrice}>Price: ${item.pricePerDay}/day</Text>
         <Text style={styles.productAvailability}>
           {item.available ? 'Available' : 'Not Available'}
@@ -39,7 +40,7 @@ const ExploreScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Explore</Text>
+      <Text style={styles.title}>Top Picks!</Text>
       <FlatList
         data={products}
         renderItem={renderItem}
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5e5d5',
+    backgroundColor: '#FFA500',
   },
   title: {
     fontSize: 24,
