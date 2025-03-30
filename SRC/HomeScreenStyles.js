@@ -1,25 +1,34 @@
-import { SafeAreaView, ScrollView, StyleSheet, StatusBar, Platform } from "react-native";
+import { StyleSheet, StatusBar, Platform } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 15,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 10 : 0, // Ensure fallback value
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 
+  /* 🔝 Header */
+  header: {
+    backgroundColor: "#FF4500",
+    padding: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
 
   /* 🔍 Search Bar */
   searchContainer: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 50,
     padding: 10,
     alignItems: "center",
-    marginBottom: 15,
-    elevation: 3,
+    marginTop: 10,
   },
-
   searchIcon: {
     marginRight: 10,
   },
@@ -28,112 +37,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  /* 📦 Categories Section */
+  /* 📦 Categories */
   categoriesWrapper: {
-    backgroundColor: "#FFA500",
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 3,
-  },
-  categoriesTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  categoriesContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
   },
   categoryBox: {
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 80,
-    marginBottom: 10,
+    alignItems: "center",
+    marginRight: 15,
+    backgroundColor: "#f8f8f8",
+    padding: 10,
+    borderRadius: 10,
+    elevation: 2,
   },
   categoryText: {
-    color: "#000000",
     fontSize: 14,
-    fontWeight: "bold",
+    marginTop: 5,
   },
 
-  /* 🔥 Popular Items & Recommendations */
+  /* 🏷️ Sections */
   sectionWrapper: {
-    backgroundColor: "#FFA500",
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 3, // ✅ Reduced from 100 to 3 (too high before)
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
+  gridWrapper: {
+    justifyContent: "space-between",
+  },
   productCard: {
+    width: "48%",
     backgroundColor: "#fff",
     padding: 10,
     borderRadius: 10,
-    marginRight: 15,
-    alignItems: "center",
-    elevation: 2,
+    marginBottom: 15,
+    elevation: 3,
   },
   productImage: {
-    width: 100,
-    height: 100,
+    width: "100%",
+    height: 120,
     borderRadius: 10,
-    marginBottom: 10,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
-    textAlign: "center",
+    marginTop: 5,
   },
   productPrice: {
     fontSize: 14,
-    color: "#007bff",
-    fontWeight: "bold",
+    color: "#FF4500",
   },
 
-  /* 🛒 Cart Icon */
-  cartIconContainer: {
-    position: "relative",
-    padding: 10,
-  },
-  cartBadge: {
+  /* 🛒 Floating Cart */
+  floatingCart: {
     position: "absolute",
-    top: 5,
-    right: 5,
-    backgroundColor: "red",
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  cartBadgeText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "bold",
+    bottom: 80,
+    right: 20,
+    backgroundColor: "#FF4500",
+    padding: 15,
+    borderRadius: 50,
   },
 
   /* 🔽 Bottom Navigation */
   bottomNav: {
     flexDirection: "row",
+    backgroundColor: "#FF4500",
+    padding: 15,
     justifyContent: "space-around",
-    backgroundColor: "#FFA500",
-    paddingVertical: 40, // Increase this value to push it down
-    borderTopLeftRadius: 100,
-    borderTopRightRadius:100,
-    elevation: 5,
   },
   navItem: {
     alignItems: "center",
   },
   navText: {
+    color: "#fff",
     fontSize: 12,
-    marginTop: 5,
   },
 });
 
