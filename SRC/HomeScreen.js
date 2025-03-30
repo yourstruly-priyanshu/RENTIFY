@@ -15,7 +15,7 @@ export default function HomeScreen({ navigation }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const auth = getAuth();
 
-  const categories = ["Electrics", "Furniture", "Vehicles", "Sports", "Fashion","Events"];
+  const categories = ["Electronics", "Furniture", "Vehicles", "Sports", "Fashion","Events"];
 
   // Check authentication state
   useEffect(() => {

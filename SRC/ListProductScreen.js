@@ -38,7 +38,7 @@ export default function ProductScreen({ navigation }) {
 
     try {
       // Save the product information
-      const productRef = doc(collection(db, 'products'));
+      const productRef = doc(collection(db, 'rentalProducts'));
       await setDoc(productRef, {
         name,
         category,

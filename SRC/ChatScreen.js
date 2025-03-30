@@ -5,7 +5,10 @@ import {
 import { collection, getDocs, addDoc, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from './firebase_config'; // Ensure this path is correct
-import axios from 'axios';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI("AIzaSyBnVsW3_Jzmy90dVAJQdEhaXWTgkfxml8o");
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const ChatScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
@@ -18,7 +21,6 @@ const ChatScreen = ({ navigation }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -64,17 +66,8 @@ const ChatScreen = ({ navigation }) => {
 
   const getGeminiResponse = async (userMessage) => {
     try {
-      const response = await axios.post(
-        'https://api.gemini.ai/v1/chat',
-        { message: userMessage },
-        {
-          headers: {
-            'Authorization': `AIzaSyBb6zQ1gPtv2HqscSfaeJrTFh-T--EkP5I`, // Use an environment variable for security
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return response.data.reply || "I couldn't get a response from AI.";
+      const result = await model.generateContent(userMessage);
+      return result.response.text() || "I couldn't get a response from AI.";
     } catch (error) {
       console.error('Error fetching response from Gemini AI:', error);
       return "Sorry, I'm unable to respond at the moment.";
@@ -91,7 +84,7 @@ const ChatScreen = ({ navigation }) => {
       try {
         const newMessage = {
           text: message,
-          createdAt: serverTimestamp(), // Using Firestore's server timestamp
+          createdAt: serverTimestamp(),
           userId: user.uid,
         };
         const docRef = await addDoc(collection(db, 'chatMessages'), newMessage);
@@ -103,7 +96,7 @@ const ChatScreen = ({ navigation }) => {
         const aiMessage = {
           text: aiResponse,
           createdAt: serverTimestamp(),
-          userId: 'gemini', // AI messages are distinguished
+          userId: 'gemini',
           system: true,
         };
 
@@ -131,17 +124,6 @@ const ChatScreen = ({ navigation }) => {
       </View>
     );
   };
-
-  if (!user) {
-    return (
-      <View style={styles.notLoggedInContainer}>
-        <Text style={styles.notLoggedInText}>You must log in to access chat.</Text>
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
-          <Text style={styles.loginButtonText}>Go to Login</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -173,78 +155,17 @@ const ChatScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  messageList: {
-    flex: 1,
-  },
-  messageContainer: {
-    margin: 8,
-    padding: 10,
-    borderRadius: 10,
-    maxWidth: "75%",
-  },
-  userMessage: {
-    backgroundColor: "#007AFF",
-    alignSelf: "flex-end",
-    padding: 10,
-    borderRadius: 10,
-  },
-  aiMessage: {
-    backgroundColor: "#e0e0e0",
-    alignSelf: "flex-start",
-    padding: 10,
-    borderRadius: 10,
-  },
-  systemMessage: {
-    backgroundColor: "#FFD700",
-    alignSelf: "center",
-    padding: 10,
-    borderRadius: 10,
-  },
-  messageText: {
-    color: "#fff",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    backgroundColor: "#fff",
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-  },
-  sendButton: {
-    backgroundColor: "#007AFF",
-    padding: 10,
-    marginLeft: 8,
-    borderRadius: 20,
-  },
-  sendButtonText: {
-    color: "#fff",
-  },
-  notLoggedInContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notLoggedInText: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  loginButton: {
-    backgroundColor: "#007AFF",
-    padding: 10,
-    borderRadius: 10,
-  },
-  loginButtonText: {
-    color: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  messageList: { flex: 1 },
+  messageContainer: { margin: 8, padding: 10, borderRadius: 10, maxWidth: "75%" },
+  userMessage: { backgroundColor: "#007AFF", alignSelf: "flex-end", padding: 10, borderRadius: 10 },
+  aiMessage: { backgroundColor: "#e0e0e0", alignSelf: "flex-start", padding: 10, borderRadius: 10 },
+  systemMessage: { backgroundColor: "#FFD700", alignSelf: "center", padding: 10, borderRadius: 10 },
+  messageText: { color: "#fff" },
+  inputContainer: { flexDirection: "row", padding: 10, backgroundColor: "#fff" },
+  input: { flex: 1, borderWidth: 1, borderColor: "#ddd", borderRadius: 20, paddingHorizontal: 10 },
+  sendButton: { backgroundColor: "#007AFF", padding: 10, marginLeft: 8, borderRadius: 20 },
+  sendButtonText: { color: "#fff" }
 });
 
 export default ChatScreen;

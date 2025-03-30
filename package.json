@@ -11,8 +11,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
     "expo": "~52.0.31",
     "expo-av": "~15.0.2",
     "expo-image-picker": "~16.0.6",
