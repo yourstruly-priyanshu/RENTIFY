@@ -6,10 +6,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   SafeAreaView,
-  StatusBar,
-  Platform,
 } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -47,7 +44,6 @@ export default function HomeScreen({ navigation }) {
         console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -77,8 +73,8 @@ export default function HomeScreen({ navigation }) {
     setFilteredProducts(products);
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
+  const renderHeader = () => (
+    <View>
       {/* Header with Search */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Find Everything for Rent</Text>
@@ -93,64 +89,74 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      <ScrollView>
-        {/* Categories */}
-        <View style={styles.categoriesWrapper}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {categories.map((item, index) => (
-              <TouchableOpacity
-                key={index}
+      {/* Categories */}
+      <View style={styles.categoriesWrapper}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={categories}
+          keyExtractor={(item) => item.name}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.categoryBox,
+                selectedCategory === item.name && styles.selectedCategory,
+              ]}
+              onPress={() => handleCategorySelect(item.name)}
+            >
+              <Icon
+                name={item.icon}
+                size={24}
+                color={selectedCategory === item.name ? "#fff" : "#FF4500"}
+              />
+              <Text
                 style={[
-                  styles.categoryBox,
-                  selectedCategory === item.name && styles.selectedCategory,
+                  styles.categoryText,
+                  selectedCategory === item.name && { color: "red" },
                 ]}
-                onPress={() => handleCategorySelect(item.name)}
               >
-                <Icon
-                  name={item.icon}
-                  size={24}
-                  color={selectedCategory === item.name ? "#fff" : "#FF4500"}
-                />
-                <Text
-                  style={[
-                    styles.categoryText,
-                    selectedCategory === item.name && { color: "red" },
-                  ]}
-                >
-                  {item.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
-        {/* Popular Items */}
-        <View style={styles.sectionWrapper}>
-          <Text style={styles.sectionTitle}>
-            {selectedCategory ? `${selectedCategory} Rentals` : "Popular Rentals"}
-          </Text>
-          <FlatList
-            data={filteredProducts}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            columnWrapperStyle={styles.gridWrapper}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.productCard}
-                onPress={() => navigation.navigate("Product", { productId: item.id })}
-              >
-                <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productPrice}>₹{item.pricePerDay}/day</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </ScrollView>
+      {/* Section Title */}
+      <View style={styles.sectionWrapper}>
+        <Text style={styles.sectionTitle}>
+          {selectedCategory ? `${selectedCategory} Rentals` : "Popular Rentals"}
+        </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={filteredProducts}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={styles.gridWrapper}
+        ListHeaderComponent={renderHeader}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.productCard}
+            onPress={() => navigation.navigate("Product", { productId: item.id })}
+          >
+            <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.productPrice}>₹{item.pricePerDay}/day</Text>
+          </TouchableOpacity>
+        )}
+      />
 
       {/* Floating Cart Button */}
-      <TouchableOpacity style={styles.floatingCart} onPress={() => navigation.navigate("CartScreen")}>
+      <TouchableOpacity
+        style={styles.floatingCart}
+        onPress={() => navigation.navigate("CartScreen")}
+      >
         <Icon name="shopping-cart" size={24} color="#fff" />
       </TouchableOpacity>
 

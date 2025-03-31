@@ -11,6 +11,8 @@ import ChatScreen from "./ChatScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
 import ForgotPasswordScreen from "./ForgotPasswordScreen";
+import CartScreen from "./CartScreen"; // ✅ Import CartScreen
+
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -24,10 +26,10 @@ export default function Navigation() {
         <Stack.Screen name="ListProduct" component={ListProductScreen} options={{ title: "List Product" }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
         <Stack.Screen name="Chat" component={ChatScreen} options={{ title: "Chat" }} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ title: "LoginScreen" }} />
-        <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ title: "SignupScreen" }} />
-        <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: "ForgotPasswordScreen" }} />
-
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ title: "Login" }} />
+        <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ title: "Sign Up" }} />
+        <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: "Forgot Password" }} />
+        <Stack.Screen name="CartScreen" component={CartScreen} options={{ title: "Cart" }} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );
