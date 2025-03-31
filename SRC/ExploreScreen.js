@@ -1,117 +1,122 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from './firebase_config'; // Ensure this path is correct
+import { db } from './firebase_config';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import styles from './ExploreScreenStyles';
 
+const ExploreScreen = ({ navigation }) => {
+  const [products, setProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('New Arrivals');
 
-const ExploreScreen = () => {
- const [products, setProducts] = useState([]);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'rentalProducts'));
+        const productList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(productList);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
 
+    fetchProducts();
+  }, []);
 
- useEffect(() => {
-   const fetchProducts = async () => {
-     try {
-       const querySnapshot = await getDocs(collection(db, 'rentalProducts'));
-       const productList = querySnapshot.docs.map((doc) => ({
-         id: doc.id,
-         ...doc.data(),
-       }));
-       setProducts(productList);
-     } catch (error) {
-       console.error('Error fetching products:', error);
-     }
-   };
+  // Generate unique products for each category to avoid repetition
+  const filterProducts = (category) => {
+    let filtered = [...products];
 
+    if (category === 'Discounts') {
+      filtered = filtered
+        .filter((item) => item.discount)
+        .map((item) => ({
+          ...item,
+          discountedPrice: (item.pricePerDay * 0.9).toFixed(2), // 10% off
+        }));
+    } else if (category === 'Deal of the Day') {
+      filtered = filtered
+        .filter((item) => item.dealOfTheDay)
+        .map((item) => ({
+          ...item,
+          discountedPrice: (item.pricePerDay * 0.85).toFixed(2), // 15% off
+        }));
+    }
 
-   fetchProducts();
- }, []);
+    return filtered.slice(0, 8); // Limit to 8 items to ensure variety
+  };
 
+  const displayedProducts = filterProducts(selectedCategory);
 
-const renderItem = ({ item }) => (
- <View style={styles.productContainer}>
-   <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-   <View style={styles.productInfo}>
-     <Text style={styles.productName}>{item.name}</Text>
-     <Text style={styles.productDescription}>{item.description}</Text>
-     <Text style={styles.productPrice}>Price: ${item.pricePerDay}/day</Text>
-     <Text style={styles.productAvailability}>
-       {item.available ? 'Available' : 'Not Available'}
-     </Text>
-   </View>
- </View>
-);
+  return (
+    <View style={styles.container}>
+      {/* Category Selection Buttons */}
+      <View style={styles.buttonContainer}>
+        {[
+          { name: 'New Arrivals', icon: 'star' },
+          { name: 'Discounts', icon: 'tags' },
+          { name: 'Deal of the Day', icon: 'fire' },
+        ].map((category) => (
+          <TouchableOpacity
+            key={category.name}
+            style={[
+              styles.categoryButton,
+              selectedCategory === category.name && styles.selectedCategory,
+            ]}
+            onPress={() => setSelectedCategory(category.name)}
+          >
+            <Icon name={category.icon} size={24} color="#FF0000" />
+            <Text style={styles.categoryText}>{category.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
+      {/* Product List - Scrollable in 2 Columns */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <FlatList
+          data={displayedProducts}
+          renderItem={({ item }) => (
+            <View style={styles.productContainer}>
+              <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+              <View style={styles.productInfo}>
+                <Text style={styles.productName}>{item.name}</Text>
+                {selectedCategory === 'Discounts' && (
+                  <Text style={styles.discountText}>10% OFF</Text>
+                )}
+                {selectedCategory === 'Deal of the Day' && (
+                  <Text style={styles.dealText}>🔥 Special Deal!</Text>
+                )}
+                <Text style={styles.productPrice}>
+                  ₹{item.discountedPrice || item.pricePerDay}/day
+                </Text>
+              </View>
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+        />
+      </ScrollView>
 
-
-
- return (
-   <View style={styles.container}>
-     <Text style={styles.title}>New Arrivals</Text>
-     <FlatList
-       data={products}
-       renderItem={renderItem}
-       keyExtractor={(item) => item.id}
-       contentContainerStyle={styles.list}
-     />
-   </View>
- );
+      {/* Floating Home Button */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Icon name="home" size={24} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
 };
 
-
-const styles = StyleSheet.create({
- container: {
-   flex: 1,
-   padding: 20,
-   backgroundColor: '#f5e5d5',
- },
- title: {
-   fontSize: 24,
-   fontWeight: 'bold',
-   marginBottom: 20,
-   textAlign: 'center',
- },
- list: {
-   paddingBottom: 20,
- },
- productContainer: {
-   alignItems: 'center', // Center the content
-   marginBottom: 15,
-   padding: 10,
-   backgroundColor: '#fff',
-   borderRadius: 8,
-   elevation: 2,
- },
- productImage: {
-   width: 100, // Adjust width as needed
-   height: 100, // Adjust height as needed
-   borderRadius: 8,
-   marginBottom: 10, // Space between image and text
- },
- productInfo: {
-   alignItems: 'center', // Center the text
- },
- productName: {
-   fontSize: 18,
-   fontWeight: 'bold',
- },
- productDescription: {
-   fontSize: 14,
-   color: '#555',
-   textAlign: 'center', // Center the description text
-   marginBottom: 5, // Space between description and price
- },
- productPrice: {
-   fontSize: 16,
-   fontWeight: 'bold',
-   marginBottom: 5, // Space between price and availability
- },
- productAvailability: {
-   fontSize: 14,
-   color: 'green', // Default color for availability
- },
-});
-
-
 export default ExploreScreen;
-
-
