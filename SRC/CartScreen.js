@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import styles from "./CartScreenStyles";
+import styles from "./stylesheets/CartScreenStyles";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function CartScreen({ navigation, route }) {

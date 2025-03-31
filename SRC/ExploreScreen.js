@@ -5,58 +5,51 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase_config';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import styles from './ExploreScreenStyles';
+import styles from './stylesheets/ExploreScreenStyles';
 
 const ExploreScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('New Arrivals');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'rentalProducts'));
-        const productList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(productList);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
-
-    fetchProducts();
+    fetchProducts('rentalProducts'); // Default collection for "New Arrivals"
   }, []);
 
-  // Generate unique products for each category to avoid repetition
-  const filterProducts = (category) => {
-    let filtered = [...products];
+  const fetchProducts = async (collectionName) => {
+    setLoading(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, collectionName));
+      const productList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    if (category === 'Discounts') {
-      filtered = filtered
-        .filter((item) => item.discount)
-        .map((item) => ({
-          ...item,
-          discountedPrice: (item.pricePerDay * 0.9).toFixed(2), // 10% off
-        }));
-    } else if (category === 'Deal of the Day') {
-      filtered = filtered
-        .filter((item) => item.dealOfTheDay)
-        .map((item) => ({
-          ...item,
-          discountedPrice: (item.pricePerDay * 0.85).toFixed(2), // 15% off
-        }));
+      // No need to manually apply discounts since Firestore has the correct field
+      setProducts(productList);
+    } catch (error) {
+      console.error(`Error fetching products from ${collectionName}:`, error);
+    } finally {
+      setLoading(false);
     }
-
-    return filtered.slice(0, 8); // Limit to 8 items to ensure variety
   };
 
-  const displayedProducts = filterProducts(selectedCategory);
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+
+    if (category === 'Discounts') {
+      fetchProducts('Discount'); // Fetch from "Discount" collection
+    } else if (category === 'Deal of the Day') {
+      fetchProducts('Deals'); // Fetch from "Deals" collection
+    } else {
+      fetchProducts('rentalProducts'); // Fetch from default collection
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -73,40 +66,63 @@ const ExploreScreen = ({ navigation }) => {
               styles.categoryButton,
               selectedCategory === category.name && styles.selectedCategory,
             ]}
-            onPress={() => setSelectedCategory(category.name)}
+            onPress={() => handleCategoryChange(category.name)}
           >
-            <Icon name={category.icon} size={24} color="#FF0000" />
+            <Icon name={category.icon} size={24} color="#FF4500" />
             <Text style={styles.categoryText}>{category.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Product List - Scrollable in 2 Columns */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <FlatList
-          data={displayedProducts}
-          renderItem={({ item }) => (
-            <View style={styles.productContainer}>
-              <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{item.name}</Text>
-                {selectedCategory === 'Discounts' && (
-                  <Text style={styles.discountText}>10% OFF</Text>
-                )}
-                {selectedCategory === 'Deal of the Day' && (
-                  <Text style={styles.dealText}>🔥 Special Deal!</Text>
-                )}
-                <Text style={styles.productPrice}>
-                  ₹{item.discountedPrice || item.pricePerDay}/day
-                </Text>
-              </View>
-            </View>
+      {/* Loading Indicator */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#FF4500" style={{ marginTop: 20 }} />
+      ) : (
+        <>
+          {/* Empty State Message */}
+          {products.length === 0 ? (
+            <Text style={styles.emptyMessage}>No products available.</Text>
+          ) : (
+            <FlatList
+              data={products}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.productContainer}
+                  onPress={() => navigation.navigate('ProductPage', { productId: item.id })}
+                >
+                  <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+                  <View style={styles.productInfo}>
+                    <Text style={styles.productName}>{item.name}</Text>
+                    
+                    {/* Show correct discount labels */}
+                    {selectedCategory === 'Discounts' && (
+                      <Text style={styles.discountText}>10% OFF</Text>
+                    )}
+                    {selectedCategory === 'Deal of the Day' && (
+                      <Text style={styles.dealText}>🔥 Special Deal!</Text>
+                    )}
+
+                    {/* Use correct price field */}
+                    <Text style={styles.productPrice}>
+                      ₹
+                      {selectedCategory === 'Discounts'
+                        ? item.discountedPPD
+                        : selectedCategory === 'Deal of the Day'
+                        ? item.dealP
+                        : item.pricePerDay}
+                      /day
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
           )}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
-        />
-      </ScrollView>
+        </>
+      )}
 
       {/* Floating Home Button */}
       <TouchableOpacity

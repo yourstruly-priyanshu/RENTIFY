@@ -11,7 +11,7 @@ import ChatScreen from "./ChatScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
 import ForgotPasswordScreen from "./ForgotPasswordScreen";
-import CartScreen from "./CartScreen"; // ✅ Import CartScreen
+import CartScreen from "./CartScreen"; 
 
 const Stack = createStackNavigator();
 
@@ -33,4 +33,4 @@ export default function Navigation() {
       </Stack.Navigator>
     </NavigationContainer>
   );
-}
+} 

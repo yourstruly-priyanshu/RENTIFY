@@ -32,8 +32,8 @@ const styles = StyleSheet.create({
     elevation: 5, // For Android shadow
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: '120%',
+    height: '120%',
   },
   title: {
     fontSize: 28,

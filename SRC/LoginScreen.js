@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, FlatList, Platform, Image, View, Text } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase_config';
-import styles from './LoginScreenStyles'; // Import the styles
+import styles from './stylesheets/LoginScreenStyles'; // Import the styles
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');

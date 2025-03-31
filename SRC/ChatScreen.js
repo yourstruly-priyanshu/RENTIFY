@@ -155,17 +155,61 @@ const ChatScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1, backgroundColor: "#fff" }, // White background
   messageList: { flex: 1 },
-  messageContainer: { margin: 8, padding: 10, borderRadius: 10, maxWidth: "75%" },
-  userMessage: { backgroundColor: "#007AFF", alignSelf: "flex-end", padding: 10, borderRadius: 10 },
-  aiMessage: { backgroundColor: "#e0e0e0", alignSelf: "flex-start", padding: 10, borderRadius: 10 },
-  systemMessage: { backgroundColor: "#FFD700", alignSelf: "center", padding: 10, borderRadius: 10 },
-  messageText: { color: "#fff" },
-  inputContainer: { flexDirection: "row", padding: 10, backgroundColor: "#fff" },
-  input: { flex: 1, borderWidth: 1, borderColor: "#ddd", borderRadius: 20, paddingHorizontal: 10 },
-  sendButton: { backgroundColor: "#007AFF", padding: 10, marginLeft: 8, borderRadius: 20 },
-  sendButtonText: { color: "#fff" }
+  
+  messageContainer: { 
+    margin: 8, 
+    padding: 10, 
+    borderRadius: 10, 
+    maxWidth: "75%" 
+  },
+  
+  userMessage: { 
+    backgroundColor: "#FF3B30", // Red for user messages
+    alignSelf: "flex-end", 
+    padding: 10, 
+    borderRadius: 10 
+  },
+  
+  aiMessage: { 
+    backgroundColor: "#FFD3D3", // Light red for AI messages
+    alignSelf: "flex-start", 
+    padding: 10, 
+    borderRadius: 10 
+  },
+  
+  systemMessage: { 
+    backgroundColor: "#FF6B6B", // Slightly darker light red for system messages
+    alignSelf: "center", 
+    padding: 10, 
+    borderRadius: 10 
+  },
+  
+  messageText: { color: "#fff" }, // White text for better contrast
+  
+  inputContainer: { 
+    flexDirection: "row", 
+    padding: 10, 
+    backgroundColor: "#fff" 
+  },
+  
+  input: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderColor: "#FF3B30", // Red border for input
+    borderRadius: 20, 
+    paddingHorizontal: 10 
+  },
+  
+  sendButton: { 
+    backgroundColor: "#FF3B30", // Red send button
+    padding: 10, 
+    marginLeft: 8, 
+    borderRadius: 20 
+  },
+  
+  sendButtonText: { color: "#fff" } // White text for send button
 });
 
 export default ChatScreen;

@@ -12,7 +12,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase_config";
 import Icon from "react-native-vector-icons/FontAwesome";
-import styles from "./HomeScreenStyles";
+import styles from "./stylesheets/HomeScreenStyles";
 
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
