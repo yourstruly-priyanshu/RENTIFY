@@ -1,17 +1,9 @@
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-import { SafeAreaView, ScrollView, StyleSheet, StatusBar, Platform } from "react-native";
-=======
+//styles
 import { StyleSheet, StatusBar, Platform } from "react-native";
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-    backgroundColor: "#f5f5f5",
-    padding: 15,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 10 : 0, // Ensure fallback value
-=======
     backgroundColor: "#fff",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
@@ -27,9 +19,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
   },
-
 
   /* 🔍 Search Bar */
   searchContainer: {
@@ -40,7 +30,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-
   searchIcon: {
     marginRight: 10,
   },
@@ -51,23 +40,9 @@ const styles = StyleSheet.create({
 
   /* 📦 Categories */
   categoriesWrapper: {
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-    backgroundColor: "#FFA500",
-=======
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
     padding: 15,
   },
   categoryBox: {
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 80,
-    marginBottom: 10,
-  },
-  categoryText: {
-    color: "#000000",
-=======
     alignItems: "center",
     marginRight: 15,
     backgroundColor: "#f8f8f8",
@@ -76,22 +51,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   categoryText: {
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
     fontSize: 14,
     marginTop: 5,
   },
 
   /* 🏷️ Sections */
   sectionWrapper: {
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-    backgroundColor: "#FFA500",
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 3, // ✅ Reduced from 100 to 3 (too high before)
-=======
-    padding: 15,
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
   },
   sectionTitle: {
     fontSize: 18,
@@ -140,14 +106,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF4500",
     padding: 15,
     justifyContent: "space-around",
-<<<<<<< HEAD:SRC/HomeScreenStyles.js
-    backgroundColor: "#FFA500",
-    paddingVertical: 40, // Increase this value to push it down
-    borderTopLeftRadius: 100,
-    borderTopRightRadius:100,
-    elevation: 5,
-=======
->>>>>>> 071d3f212a95b1ca12fa995447118ff3a64438aa:SRC/stylesheets/HomeScreenStyles.js
   },
   navItem: {
     alignItems: "center",
