@@ -7,7 +7,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from './firebase_config'; // Ensure this path is correct
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("AIzaSyBnVsW3_Jzmy90dVAJQdEhaXWTgkfxml8o");
+const genAI = new GoogleGenerativeAI("AIzaSyCLjSJeQYIOg9GzRQKViWZRN6yDGZKgcXU");
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const ChatScreen = ({ navigation }) => {
@@ -155,61 +155,17 @@ const ChatScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" }, // White background
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
   messageList: { flex: 1 },
-  
-  messageContainer: { 
-    margin: 8, 
-    padding: 10, 
-    borderRadius: 10, 
-    maxWidth: "75%" 
-  },
-  
-  userMessage: { 
-    backgroundColor: "#FF3B30", // Red for user messages
-    alignSelf: "flex-end", 
-    padding: 10, 
-    borderRadius: 10 
-  },
-  
-  aiMessage: { 
-    backgroundColor: "#FFD3D3", // Light red for AI messages
-    alignSelf: "flex-start", 
-    padding: 10, 
-    borderRadius: 10 
-  },
-  
-  systemMessage: { 
-    backgroundColor: "#FF6B6B", // Slightly darker light red for system messages
-    alignSelf: "center", 
-    padding: 10, 
-    borderRadius: 10 
-  },
-  
-  messageText: { color: "#fff" }, // White text for better contrast
-  
-  inputContainer: { 
-    flexDirection: "row", 
-    padding: 10, 
-    backgroundColor: "#fff" 
-  },
-  
-  input: { 
-    flex: 1, 
-    borderWidth: 1, 
-    borderColor: "#FF3B30", // Red border for input
-    borderRadius: 20, 
-    paddingHorizontal: 10 
-  },
-  
-  sendButton: { 
-    backgroundColor: "#FF3B30", // Red send button
-    padding: 10, 
-    marginLeft: 8, 
-    borderRadius: 20 
-  },
-  
-  sendButtonText: { color: "#fff" } // White text for send button
+  messageContainer: { margin: 8, padding: 10, borderRadius: 10, maxWidth: "75%" },
+  userMessage: { backgroundColor: "#FFC300", alignSelf: "flex-end", padding: 10, borderRadius: 10 },
+  aiMessage: { backgroundColor: "#FF0000", alignSelf: "flex-start", padding: 10, borderRadius: 10 },
+  systemMessage: { backgroundColor: "#FF5733", alignSelf: "center", padding: 10, borderRadius: 10 },
+  messageText: { color: "#000000" },
+  inputContainer: { flexDirection: "row", padding: 10, backgroundColor: "#fff" },
+  input: { flex: 1, borderWidth: 1, borderColor: "#ddd", borderRadius: 20, paddingHorizontal: 10 },
+  sendButton: { backgroundColor: "#007AFF", padding: 10, marginLeft: 8, borderRadius: 20 },
+  sendButtonText: { color: "#fff" }
 });
 
-export default ChatScreen;
+export default ChatScreen; 
