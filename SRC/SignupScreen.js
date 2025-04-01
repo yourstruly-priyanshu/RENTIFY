@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, TouchableOpacity, StyleSheet, Text, View, Animated, Dimensions, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { 
+  TextInput, TouchableOpacity, Text, View, Animated, 
+  KeyboardAvoidingView, ScrollView, Platform 
+} from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './firebase_config';
 import { collection, addDoc } from 'firebase/firestore';
-
-const { width } = Dimensions.get('window');
+import styles from './stylesheets/SignupScreenStyles'; // Import styles separately
 
 export default function SignupScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -34,7 +36,7 @@ export default function SignupScreen({ navigation }) {
 
   const interpolateColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E6C79F', '#FFE4C4'],
+    outputRange: ['#FFCCCB', '#FFFFFF'], // Light red to white (consistent with login page)
   });
 
   const handleSignup = async () => {
@@ -92,65 +94,3 @@ export default function SignupScreen({ navigation }) {
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  scrollContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#000',
-    marginBottom: 20,
-  },
-  label: {
-    alignSelf: 'flex-start',
-    color: '#000',
-    marginBottom: 5,
-  },
-  input: {
-    width: width * 0.9,
-    height: 50,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#000',
-  },
-  button: {
-    width: '100%',
-    paddingVertical: 15,
-    borderWidth: 2,
-    borderColor: '#000',
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  link: {
-    color: '#000',
-    marginTop: 15,
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
-});
