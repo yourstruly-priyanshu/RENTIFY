@@ -1,3 +1,4 @@
+// login
 import React, { useState, useEffect } from 'react';
 import { TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, FlatList, Platform, Image, View, Text } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';

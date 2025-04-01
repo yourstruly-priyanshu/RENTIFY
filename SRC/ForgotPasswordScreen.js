@@ -8,7 +8,7 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const animatedValue = new Animated.Value(0); // Define animated value
+  const animatedValue = new Animated.Value(0); 
 
   useEffect(() => {
     Animated.loop(

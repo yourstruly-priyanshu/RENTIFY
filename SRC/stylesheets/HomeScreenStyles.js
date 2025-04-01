@@ -1,3 +1,4 @@
+//styles
 import { StyleSheet, StatusBar, Platform } from "react-native";
 
 const styles = StyleSheet.create({

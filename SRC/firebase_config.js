@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDk2MiLZwF6tYpz7YwSXFfPSHgzFdHj9As",
   authDomain: "rentifypro837190.firebaseapp.com",
   projectId: "rentifypro837190",
-  storageBucket: "rentifypro837190.appspot.com",  // Correct bucket format
+  storageBucket: "rentifypro837190.appspot.com",  
   messagingSenderId: "55506909553",
   appId: "1:55506909553:web:165ab338085e5bf3661ed0",
   measurementId: "G-Z8DMVY8KX6",

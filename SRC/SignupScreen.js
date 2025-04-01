@@ -1,3 +1,4 @@
+// signin signup
 import React, { useState, useEffect } from 'react';
 import { 
   TextInput, TouchableOpacity, Text, View, Animated, 
@@ -6,7 +7,7 @@ import {
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './firebase_config';
 import { collection, addDoc } from 'firebase/firestore';
-import styles from './stylesheets/SignupScreenStyles'; // Import styles separately
+import styles from './stylesheets/SignupScreenStyles'; 
 
 export default function SignupScreen({ navigation }) {
   const [name, setName] = useState('');

@@ -30,7 +30,6 @@ const ExploreScreen = ({ navigation }) => {
         ...doc.data(),
       }));
 
-      // No need to manually apply discounts since Firestore has the correct field
       setProducts(productList);
     } catch (error) {
       console.error(`Error fetching products from ${collectionName}:`, error);
