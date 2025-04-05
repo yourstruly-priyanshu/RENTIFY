@@ -1,14 +1,13 @@
-//chat
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { collection, getDocs, addDoc, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { db } from './firebase_config'; // Ensure this path is correct
+import { db } from './firebase_config';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("AIzaSyCLjSJeQYIOg9GzRQKViWZRN6yDGZKgcXU");
+const genAI = new GoogleGenerativeAI("YOUR_GEMINI_API_KEY_HERE"); // Replace with your actual Gemini API key
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const ChatScreen = ({ navigation }) => {
@@ -30,10 +29,8 @@ const ChatScreen = ({ navigation }) => {
 
     const fetchMessages = async () => {
       try {
-        const messagesQuery = query(
-          collection(db, 'chatMessages'),
-          orderBy('createdAt', 'asc')
-        );
+        const userMessagesRef = collection(db, 'users', user.uid, 'chatMessages');
+        const messagesQuery = query(userMessagesRef, orderBy('createdAt', 'asc'));
         const querySnapshot = await getDocs(messagesQuery);
         const messagesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -42,7 +39,7 @@ const ChatScreen = ({ navigation }) => {
 
         if (!messagesList.some(msg => msg.system)) {
           const welcomeMessage = {
-            id: 'message',
+            id: 'welcome',
             text: 'Hi, I am a chatbot. If you have any questions, feel free to ask!',
             createdAt: new Date(),
             system: true,
@@ -55,7 +52,7 @@ const ChatScreen = ({ navigation }) => {
         console.error('Error fetching messages:', error);
       }
     };
-    
+
     fetchMessages();
   }, [user]);
 
@@ -70,7 +67,7 @@ const ChatScreen = ({ navigation }) => {
       const result = await model.generateContent(userMessage);
       return result.response.text() || "I couldn't get a response from AI.";
     } catch (error) {
-      console.error('Error fetching response from Gemini AI:', error);
+      console.error('Gemini error:', error);
       return "Sorry, I'm unable to respond at the moment.";
     }
   };
@@ -88,11 +85,13 @@ const ChatScreen = ({ navigation }) => {
           createdAt: serverTimestamp(),
           userId: user.uid,
         };
-        const docRef = await addDoc(collection(db, 'chatMessages'), newMessage);
+
+        const userMessagesRef = collection(db, 'users', user.uid, 'chatMessages');
+        const docRef = await addDoc(userMessagesRef, newMessage);
+
         setMessages(prevMessages => [...prevMessages, { id: docRef.id, ...newMessage }]);
         setMessage('');
 
-        // Get response from Gemini AI
         const aiResponse = await getGeminiResponse(message);
         const aiMessage = {
           text: aiResponse,
@@ -101,11 +100,11 @@ const ChatScreen = ({ navigation }) => {
           system: true,
         };
 
-        const aiDocRef = await addDoc(collection(db, 'chatMessages'), aiMessage);
+        const aiDocRef = await addDoc(userMessagesRef, aiMessage);
         setMessages(prevMessages => [...prevMessages, { id: aiDocRef.id, ...aiMessage }]);
 
       } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Send error:', error);
       }
     }
   };
@@ -118,7 +117,7 @@ const ChatScreen = ({ navigation }) => {
     return (
       <View style={[
         styles.messageContainer,
-        isSystemMessage ? styles.systemMessage : isUserMessage ? styles.userMessage : isAiMessage ? styles.aiMessage : styles.otherMessage,
+        isSystemMessage ? styles.systemMessage : isUserMessage ? styles.userMessage : styles.aiMessage,
         { alignSelf: isUserMessage ? 'flex-end' : 'flex-start' }
       ]}>
         <Text style={styles.messageText}>{item.text}</Text>
@@ -169,4 +168,4 @@ const styles = StyleSheet.create({
   sendButtonText: { color: "#fff" }
 });
 
-export default ChatScreen; 
+export default ChatScreen;
