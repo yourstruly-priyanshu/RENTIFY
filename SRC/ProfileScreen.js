@@ -62,20 +62,33 @@ export default function ProfileScreen({ navigation }) {
  };
 
 
- const pickImage = async () => {
+const pickImage = async () => {
+ try {
    const result = await ImagePicker.launchImageLibraryAsync({
-     mediaTypes: ImagePicker.MediaType.Images, // ✅ fixed deprecation
+     mediaTypes: ImagePicker.MediaType.Images, // ✅ fixed deprecated warning
      allowsEditing: true,
      aspect: [1, 1],
      quality: 1,
    });
 
 
-   if (!result.canceled && result.assets && result.assets[0]?.uri) {
+   if (!result.canceled && result.assets && result.assets.length > 0) {
      const uri = result.assets[0].uri;
-     await uploadImage(uri);
+     if (uri) {
+       await uploadImage(uri);
+     } else {
+       throw new Error("Image URI not found.");
+     }
+   } else {
+     console.log("Image picking canceled or no assets found.");
    }
- };
+ } catch (error) {
+   console.error("❌ Error picking image:", error);
+   Alert.alert("Error", "Could not open image picker.");
+ }
+};
+
+
 
 
  const uploadImage = async (uri) => {
@@ -85,19 +98,28 @@ export default function ProfileScreen({ navigation }) {
 
      const response = await fetch(uri);
      const blob = await response.blob();
-     const imageRef = ref(storage, `profile_pictures/${user.uid}`);
+
+
+     const fileExtension = uri.split('.').pop();
+     const fileName = `profile_${user.uid}.${fileExtension || 'jpg'}`;
+     const imageRef = ref(storage, `profile_pictures/${fileName}`);
+
+
      await uploadBytes(imageRef, blob);
      const downloadURL = await getDownloadURL(imageRef);
+
+
      setProfilePic(downloadURL);
 
 
-     // Update Firestore with new profilePic URL
+     // Update Firestore
      const userRef = doc(db, 'users', user.uid);
      await setDoc(userRef, { profilePic: downloadURL }, { merge: true });
 
 
+     Alert.alert('Success', 'Profile picture updated!');
    } catch (error) {
-     console.error('Image upload failed:', error);
+     console.error('❌ Image upload failed:', error);
      Alert.alert('Error', 'Image upload failed.');
    }
  };
@@ -119,10 +141,30 @@ export default function ProfileScreen({ navigation }) {
          </TouchableOpacity>
 
 
-         <TextInput style={styles.input} placeholder='Name' value={name} onChangeText={setName} />
-         <TextInput style={styles.input} placeholder='DOB' value={dob} onChangeText={setDob} />
-         <TextInput style={styles.input} placeholder='Contact' value={contact} onChangeText={setContact} />
-         <TextInput style={styles.input} placeholder='Email' value={email} onChangeText={setEmail} />
+         <TextInput
+           style={styles.input}
+           placeholder='Name'
+           value={name}
+           onChangeText={setName}
+         />
+         <TextInput
+           style={styles.input}
+           placeholder='DOB'
+           value={dob}
+           onChangeText={setDob}
+         />
+         <TextInput
+           style={styles.input}
+           placeholder='Contact'
+           value={contact}
+           onChangeText={setContact}
+         />
+         <TextInput
+           style={styles.input}
+           placeholder='Email'
+           value={email}
+           onChangeText={setEmail}
+         />
 
 
          <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -131,8 +173,13 @@ export default function ProfileScreen({ navigation }) {
        </>
      ) : (
        <View style={styles.loginBox}>
-         <Text style={styles.notLoggedInText}>You must be logged in to view your profile.</Text>
-         <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
+         <Text style={styles.notLoggedInText}>
+           You must be logged in to view your profile.
+         </Text>
+         <TouchableOpacity
+           style={styles.loginButton}
+           onPress={() => navigation.navigate('LoginScreen')}
+         >
            <Text style={styles.loginButtonText}>Go to Login</Text>
          </TouchableOpacity>
        </View>
@@ -140,5 +187,4 @@ export default function ProfileScreen({ navigation }) {
    </View>
  );
 }
-
 
