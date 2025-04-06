@@ -5,6 +5,7 @@ import {
   Alert,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -16,6 +17,8 @@ const PaymentScreen = () => {
   const navigation = useNavigation();
   const { product } = route.params;
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   useEffect(() => {
     const auth = getAuth();
@@ -26,17 +29,21 @@ const PaymentScreen = () => {
   }, []);
 
   const handleUPIPayment = () => {
-    Alert.alert("UPI Payment", "Redirecting to UPI app...");
-    confirmPayment("UPI");
+    setLoadingMessage("Processing payment via UPI...");
+    setIsLoading(true);
+    setTimeout(() => confirmPayment("UPI"), 2000); // Simulated delay
   };
 
   const handleCashOnDelivery = () => {
-    confirmPayment("Cash on Delivery");
+    setLoadingMessage("Awaiting seller confirmation...");
+    setIsLoading(true);
+    setTimeout(() => confirmPayment("Cash on Delivery"), 2000); // Simulated delay
   };
 
   const confirmPayment = async (method) => {
     if (!user) {
       Alert.alert("Login Required", "Please login to continue");
+      setIsLoading(false);
       return;
     }
 
@@ -50,17 +57,40 @@ const PaymentScreen = () => {
         status: method === "Cash on Delivery" ? "Pending" : "Paid",
         createdAt: serverTimestamp(),
       });
-
+    } finally {
+      setIsLoading(false);
       Alert.alert("Success", `Your rental is confirmed via ${method}.`);
       navigation.navigate("Home");
-    } catch (err) {
-      console.error("Error confirming payment:", err);
-      Alert.alert("Error", "Something went wrong while confirming your order.");
     }
   };
 
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loginBoxWrapper}>
+          <View style={styles.loginBox}>
+            <Text style={styles.notLoggedInText}>You must log in to rent items.</Text>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => navigation.navigate("LoginScreen")}
+            >
+              <Text style={styles.loginButtonText}>Go to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      {isLoading && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#B22222" />
+          <Text style={styles.loadingText}>{loadingMessage}</Text>
+        </View>
+      )}
+
       <Text style={styles.title}>Choose Payment Method</Text>
       <Text style={styles.productName}>{product.name}</Text>
       <Text style={styles.price}>Total: ₹{product.pricePerDay} / day</Text>
@@ -77,16 +107,71 @@ const PaymentScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  productName: { fontSize: 18, color: "gray", marginBottom: 10 },
-  price: { fontSize: 20, fontWeight: "bold", color: "green", marginBottom: 30 },
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    backgroundColor: "#FFDADA",
+  },
+  loginBoxWrapper: {
+    alignItems: "center",
+  },
+  loginBox: {
+    width: "100%",
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  notLoggedInText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#8B0000",
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: "#B22222",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+    textAlign: "center",
+  },
+  productName: {
+    fontSize: 18,
+    color: "gray",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "green",
+    marginBottom: 30,
+    textAlign: "center",
+  },
   button: {
     backgroundColor: "#00c853",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
     width: "80%",
+    alignSelf: "center",
     alignItems: "center",
   },
   buttonText: {
@@ -99,11 +184,24 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     width: "80%",
+    alignSelf: "center",
     alignItems: "center",
   },
   buttonTextOutline: {
     color: "#ff6f00",
     fontSize: 16,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#fff",
   },
 });
 
