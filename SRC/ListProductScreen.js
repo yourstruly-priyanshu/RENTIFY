@@ -105,7 +105,7 @@ export default function ProductScreen({ navigation }) {
             <Text style={styles.uploadButtonText}>Upload Image</Text>
           </TouchableOpacity>
           <TextInput style={styles.input} placeholder='Product Name' value={name} onChangeText={setName} />
-          <TextInput style={styles.input} placeholder='Product Image URL' value={name} onChangeText={setImageUrl} />
+          <TextInput style={styles.input} placeholder='Product Image URL' value={imageUrl} onChangeText={setImageUrl} />
           <TextInput style={styles.input} placeholder='Category' value={category} onChangeText={setCategory} />
           <TextInput style={styles.input} placeholder='Description' value={description} onChangeText={setDescription} />
           <TextInput style={styles.input} placeholder='Location' value={location} onChangeText={setLocation} />
