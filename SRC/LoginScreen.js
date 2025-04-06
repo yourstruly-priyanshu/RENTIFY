@@ -133,13 +133,26 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      {/* 🔵 Google Login Button */}
+      {/* ✅ Transparent Google Login Button */}
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#4285F4' }]}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingVertical: 12,
+          marginTop: 10,
+          backgroundColor: 'transparent',
+        }}
         onPress={() => promptAsync()}
         disabled={!request}
       >
-        <Text style={styles.buttonText}>Sign in with Google</Text>
+        <Image
+          source={require('./assets/google_icon.png')}
+          style={{ width: 20, height: 20, marginRight: 10 }}
+        />
+        <Text style={[styles.buttonText, { color: '#B22222' }]}>
+          Sign in with Google
+        </Text>
       </TouchableOpacity>
 
       <Text
