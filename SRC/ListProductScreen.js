@@ -95,34 +95,34 @@ export default function ProductScreen({ navigation }) {
  };
 
 
- return (
-   <ScrollView contentContainerStyle={styles.container}>
-     {user ? (
-       <>
-         <Text style={styles.title}>Product Listing</Text>
-         {imageUrl ? <Image source={{ uri: imageUrl }} style={styles.productImage} /> : null}
-         <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>
-           <Text style={styles.uploadButtonText}>Upload Image</Text>
-         </TouchableOpacity>
-         <TextInput style={styles.input} placeholder='Product Name' value={name} onChangeText={setName} />
-         <TextInput style={styles.input} placeholder='Product Image URL' value={imageUrl} onChangeText={setImageUrl} />
-         <TextInput style={styles.input} placeholder='Category' value={category} onChangeText={setCategory} />
-         <TextInput style={styles.input} placeholder='Description' value={description} onChangeText={setDescription} />
-         <TextInput style={styles.input} placeholder='Location' value={location} onChangeText={setLocation} />
-         <TextInput style={styles.input} placeholder='Price Per Day' value={pricePerDay} onChangeText={setPricePerDay} keyboardType="numeric" />
-         <TouchableOpacity style={styles.button} onPress={handleSave}>
-           <Text style={styles.buttonText}>List Product</Text>
-         </TouchableOpacity>
-       </>
-     ) : (
-       <View style={styles.loginBox}>
-         <Text style={styles.notLoggedInText}>You must be logged in to list a product.</Text>
-         <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('LoginScreen')}>
-           <Text style={styles.loginButtonText}>Go to Login</Text>
-         </TouchableOpacity>
-       </View>
-     )}
-   </ScrollView>
- );
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      {user ? (
+        <>
+          <Text style={styles.title}>Product Listing</Text>
+          {imageUrl ? <Image source={{ uri: imageUrl }} style={styles.productImage} /> : null}
+          <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>
+            <Text style={styles.uploadButtonText}>Upload Image</Text>
+          </TouchableOpacity>
+          <TextInput style={styles.input} placeholder='Product Name' value={name} onChangeText={setName} />
+          <TextInput style={styles.input} placeholder='Product Image URL' value={name} onChangeText={setImageUrl} />
+          <TextInput style={styles.input} placeholder='Category' value={category} onChangeText={setCategory} />
+          <TextInput style={styles.input} placeholder='Description' value={description} onChangeText={setDescription} />
+          <TextInput style={styles.input} placeholder='Location' value={location} onChangeText={setLocation} />
+          <TextInput style={styles.input} placeholder='Price Per Day' value={pricePerDay} onChangeText={setPricePerDay} keyboardType="numeric" />
+          <TouchableOpacity style={styles.button} onPress={handleSave}>
+            <Text style={styles.buttonText}>List Product</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View style={styles.loginBox}>
+          <Text style={styles.notLoggedInText}>You must be logged in to list a product.</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
+  );
 }
 
