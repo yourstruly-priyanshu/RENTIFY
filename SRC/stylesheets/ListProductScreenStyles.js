@@ -42,7 +42,7 @@ export default StyleSheet.create({
     backgroundColor: '#FFF', // White input background
   },
   button: {
-    backgroundColor: '#FF4D4D', // Red button
+    backgroundColor: '#8B0000', // Red button
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

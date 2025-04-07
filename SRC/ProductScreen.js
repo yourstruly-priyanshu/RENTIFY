@@ -6,6 +6,7 @@ import {
   Button,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
@@ -45,28 +46,39 @@ const ProductScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Image source={{ uri: product.imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{product.name}</Text>
-      <Text style={styles.category}>{product.category}</Text>
-      <Text style={styles.description}>{product.description}</Text>
-      <Text style={styles.price}>₹{product.pricePerDay} / day</Text>
-      <Text style={styles.location}>📍 {product.location}</Text>
 
-      <View style={styles.buttonWrapper}>
+      <View style={styles.card}>
+        <Text style={styles.title}>{product.name}</Text>
+        <Text style={styles.category}>{product.category}</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.description}>{product.description}</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.price}>₹{product.pricePerDay} / day</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.location}>📍 {product.location}</Text>
+      </View>
+
+      <View style={[styles.card, styles.buttonWrapper]}>
         <Button
           title="Rent Now"
           onPress={() => navigation.navigate("Payment", { product })}
           color="#ff6600"
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     alignItems: "center",
   },
@@ -75,11 +87,24 @@ const styles = StyleSheet.create({
     height: 250,
     resizeMode: "cover",
     borderRadius: 10,
+    marginBottom: 15,
+  },
+  card: {
+    width: "90%",
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 8,
+    shadowColor: "#FFCCCB",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginTop: 10,
+    marginBottom: 5,
   },
   category: {
     fontSize: 18,
@@ -87,19 +112,18 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    marginTop: 10,
     textAlign: "center",
   },
   price: {
     fontSize: 20,
     fontWeight: "bold",
     color: "green",
-    marginTop: 5,
+    textAlign: "center",
   },
   location: {
     fontSize: 16,
     color: "blue",
-    marginTop: 10,
+    textAlign: "center",
   },
   errorText: {
     fontSize: 18,
@@ -108,8 +132,8 @@ const styles = StyleSheet.create({
     marginTop: 200,
   },
   buttonWrapper: {
-    marginTop: 20,
-    width: "60%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
