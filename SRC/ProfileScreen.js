@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, TouchableOpacity, Text, View, Image, Alert } from 'react-native';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'; // Added signOut import
 import { auth, db, storage } from './firebase_config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,7 +13,7 @@ export default function ProfileScreen({ navigation }) {
   const [dob, setDob] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
-  const [profileImage, setProfileImage] = useState(null); // ✅ rename here
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -27,7 +27,7 @@ export default function ProfileScreen({ navigation }) {
           setDob(data.dob || '');
           setContact(data.contact || '');
           setEmail(data.email || '');
-          setProfileImage(data.profileImage || null); // ✅ use 'profileImage' here
+          setProfileImage(data.profileImage || null);
         }
       }
     });
@@ -48,7 +48,7 @@ export default function ProfileScreen({ navigation }) {
         dob,
         contact,
         email,
-        profileImage, // ✅ save it with correct key
+        profileImage,
       }, { merge: true });
 
       Alert.alert('Success', 'Profile updated successfully!');
@@ -97,15 +97,26 @@ export default function ProfileScreen({ navigation }) {
       await uploadBytes(imageRef, blob);
       const downloadURL = await getDownloadURL(imageRef);
 
-      setProfileImage(downloadURL); // ✅ update state
+      setProfileImage(downloadURL);
 
       const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, { profileImage: downloadURL }, { merge: true }); // ✅ save as 'profileImage'
+      await setDoc(userRef, { profileImage: downloadURL }, { merge: true });
 
       Alert.alert('Success', 'Profile picture updated!');
     } catch (error) {
       console.error('❌ Image upload failed:', error);
       Alert.alert('Error', 'Image upload failed.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      Alert.alert('Success', 'You have been logged out.');
+      navigation.navigate('LoginScreen'); // Navigate to login screen after logout
+    } catch (error) {
+      console.error('Error logging out:', error);
+      Alert.alert('Error', 'Failed to log out.');
     }
   };
 
@@ -151,6 +162,10 @@ export default function ProfileScreen({ navigation }) {
 
           <TouchableOpacity style={styles.button} onPress={handleSave}>
             <Text style={styles.buttonText}>Save Profile</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Log Out</Text>
           </TouchableOpacity>
         </>
       ) : (
