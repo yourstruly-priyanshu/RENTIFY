@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   Button,
   StyleSheet,
   ActivityIndicator,
-  ScrollView,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
@@ -15,14 +14,17 @@ import { db } from "./firebase_config";
 const ProductScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { productId } = route.params;
+  const { productId } = route.params || {};
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cartItems, setCartItems] = useState(route.params?.cartItems || []);
 
+  // Fetch product data
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        if (!productId) return;
         const productRef = doc(db, "rentalProducts", productId);
         const productSnap = await getDoc(productRef);
         if (productSnap.exists()) {
@@ -33,9 +35,30 @@ const ProductScreen = () => {
       }
       setLoading(false);
     };
-
     fetchProduct();
   }, [productId]);
+
+  const addToCart = useCallback(() => {
+    if (!product) return;
+
+    const newItem = {
+      ...product,
+      id: productId,
+      cartTimestamp: Date.now(),
+      quantity: 1,
+    };
+
+    // Update state first
+    setCartItems((prevCartItems) => {
+      const updatedCart = [...prevCartItems, newItem];
+      return updatedCart;
+    });
+
+    // Navigate after state update is queued (not during render)
+    setTimeout(() => {
+      navigation.navigate("CartScreen", { cartItems: [...cartItems, newItem] });
+    }, 0);
+  }, [product, productId, navigation, cartItems]);
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -46,65 +69,49 @@ const ProductScreen = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Image source={{ uri: product.imageUrl }} style={styles.image} />
+      <Text style={styles.title}>{product.name}</Text>
+      <Text style={styles.category}>{product.category}</Text>
+      <Text style={styles.description}>{product.description}</Text>
+      <Text style={styles.price}>₹{product.pricePerDay} / day</Text>
+      <Text style={styles.location}>📍 {product.location}</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.title}>{product.name}</Text>
-        <Text style={styles.category}>{product.category}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.description}>{product.description}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.price}>₹{product.pricePerDay} / day</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.location}>📍 {product.location}</Text>
-      </View>
-
-      <View style={[styles.card, styles.buttonWrapper]}>
+      <View style={styles.buttonWrapper}>
         <Button
           title="Rent Now"
           onPress={() => navigation.navigate("Payment", { product })}
           color="#ff6600"
         />
       </View>
-    </ScrollView>
+      <View style={styles.buttonWrapper}>
+        <Button
+          title="Add to Cart"
+          onPress={addToCart}
+          color="#007bff"
+        />
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
     alignItems: "center",
+    backgroundColor: '#fff',
   },
   image: {
     width: "100%",
     height: 250,
     resizeMode: "cover",
     borderRadius: 10,
-    marginBottom: 15,
-  },
-  card: {
-    width: "90%",
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 8,
-    shadowColor: "#FFCCCB",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginTop: 10,
   },
   category: {
     fontSize: 18,
@@ -112,18 +119,19 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
+    marginTop: 10,
     textAlign: "center",
   },
   price: {
     fontSize: 20,
     fontWeight: "bold",
     color: "green",
-    textAlign: "center",
+    marginTop: 5,
   },
   location: {
     fontSize: 16,
     color: "blue",
-    textAlign: "center",
+    marginTop: 10,
   },
   errorText: {
     fontSize: 18,
@@ -132,8 +140,8 @@ const styles = StyleSheet.create({
     marginTop: 200,
   },
   buttonWrapper: {
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 20,
+    width: "60%",
   },
 });
 
