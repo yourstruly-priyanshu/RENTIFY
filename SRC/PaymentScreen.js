@@ -15,10 +15,15 @@ import { db } from "./firebase_config";
 const PaymentScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { product } = route.params;
+  const { product, cartItems } = route.params || {};
+
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+
+  // Determine if we're handling a single product or cart items
+  const items = cartItems || (product ? [product] : []);
+  const totalAmount = items.reduce((sum, item) => sum + (item.pricePerDay * (item.quantity || 1)), 0);
 
   useEffect(() => {
     const auth = getAuth();
@@ -48,16 +53,23 @@ const PaymentScreen = () => {
     }
 
     try {
-      await addDoc(collection(db, "orders"), {
-        productId: product.id,
-        productName: product.name,
-        amount: product.pricePerDay,
-        paymentMethod: method,
-        userId: user.uid,
-        status: method === "Cash on Delivery" ? "Pending" : "Paid",
-        createdAt: serverTimestamp(),
-      });
-    } finally {
+      // Create an order for each item
+      for (const item of items) {
+        await addDoc(collection(db, "orders"), {
+          productId: item.id,
+          productName: item.name,
+          amount: item.pricePerDay * (item.quantity || 1),
+          quantity: item.quantity || 1,
+          paymentMethod: method,
+          userId: user.uid,
+          status: method === "Cash on Delivery" ? "Pending" : "Paid",
+          createdAt: serverTimestamp(),
+        });
+      }
+    }/* catch (error) {
+      console.error("Error creating order:", error);
+      Alert.alert("Error", "Failed to process order. Please try again.");
+    } */finally {
       setIsLoading(false);
       Alert.alert("Success", `Your rental is confirmed via ${method}.`);
       navigation.navigate("Home");
@@ -82,6 +94,14 @@ const PaymentScreen = () => {
     );
   }
 
+  if (items.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>No items to process payment for.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {isLoading && (
@@ -92,8 +112,18 @@ const PaymentScreen = () => {
       )}
 
       <Text style={styles.title}>Choose Payment Method</Text>
-      <Text style={styles.productName}>{product.name}</Text>
-      <Text style={styles.price}>Total: ₹{product.pricePerDay} / day</Text>
+
+      {items.map((item, index) => (
+        <View key={`${item.id}-${index}`} style={styles.itemContainer}>
+          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={styles.itemPrice}>
+            ₹{item.pricePerDay * (item.quantity || 1)}
+            {item.quantity > 1 ? ` (${item.quantity} × ₹${item.pricePerDay}/day)` : ""}
+          </Text>
+        </View>
+      ))}
+
+      <Text style={styles.totalPrice}>Total: ₹{totalAmount}</Text>
 
       <TouchableOpacity style={styles.button} onPress={handleUPIPayment}>
         <Text style={styles.buttonText}>Pay with UPI</Text>
@@ -152,17 +182,27 @@ const styles = StyleSheet.create({
     color: "#333",
     textAlign: "center",
   },
+  itemContainer: {
+    marginBottom: 10,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 5,
+  },
   productName: {
     fontSize: 18,
-    color: "gray",
-    marginBottom: 10,
-    textAlign: "center",
+    color: "#333",
   },
-  price: {
+  itemPrice: {
+    fontSize: 16,
+    color: "green",
+    marginTop: 5,
+  },
+  totalPrice: {
     fontSize: 20,
     fontWeight: "bold",
     color: "green",
     marginBottom: 30,
+    marginTop: 20,
     textAlign: "center",
   },
   button: {
@@ -202,6 +242,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "#fff",
+  },
+  errorText: {
+    fontSize: 18,
+    color: "red",
+    textAlign: "center",
+    marginTop: 50,
   },
 });
 
