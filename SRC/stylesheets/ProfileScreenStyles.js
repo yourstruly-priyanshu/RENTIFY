@@ -1,4 +1,3 @@
-//styles
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
@@ -56,6 +55,21 @@ export default StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#8B0000', // Dark Red Button
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '90%',
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: '#8B0000', // Dark Red Border
+  },
+  logoutButtonText: {
+    color: '#fff', // Dark Red Text
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   notLoggedInText: {
     fontSize: 18,
