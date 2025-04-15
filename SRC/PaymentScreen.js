@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 60,
-    backgroundColor: "#FFDADA",
+    backgroundColor: "#FFf",
   },
   loginBoxWrapper: {
     alignItems: "center",
@@ -184,9 +184,9 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     marginBottom: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
+    padding: 20,
+    backgroundColor: "#ffe5b4",
+    borderRadius: 15,
   },
   productName: {
     fontSize: 18,

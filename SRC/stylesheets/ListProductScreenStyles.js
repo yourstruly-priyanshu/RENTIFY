@@ -5,13 +5,13 @@ export default StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#FFC1C1', // Light red background
+    backgroundColor: '#fff', 
     alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#8B0000', // Dark red text
+    color: '#000000', 
     marginBottom: 20,
   },
   productImage: {
@@ -21,7 +21,7 @@ export default StyleSheet.create({
     marginRight: 10,
   },
   uploadButton: {
-    backgroundColor: '#FF4D4D', // Red button
+    backgroundColor: '#FC6600', // Red button
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
@@ -34,7 +34,7 @@ export default StyleSheet.create({
   input: {
     width: '90%',
     height: 50,
-    borderColor: '#8B0000', // Dark red border
+    borderColor: '#FC6600', // Dark red border
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
@@ -42,7 +42,7 @@ export default StyleSheet.create({
     backgroundColor: '#FFF', // White input background
   },
   button: {
-    backgroundColor: '#8B0000', // Red button
+    backgroundColor: '#FC6600', // Red button
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -70,7 +70,7 @@ export default StyleSheet.create({
     elevation: 5,
   },
   loginButton: {
-    backgroundColor: '#FF4D4D', // Red button
+    backgroundColor: '#FC6600', // Red button
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',

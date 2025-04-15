@@ -29,7 +29,7 @@ export default function ForgotPasswordScreen() {
 
   const interpolateColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#FFCCCB', '#FFFFFF'], // Light red to white
+    outputRange: ['#FFFFFF', '#FFFFFF'], // Light red to white
   });
 
   const handleResetPassword = () => {

@@ -37,7 +37,7 @@ export default function SignupScreen({ navigation }) {
 
   const interpolateColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#FFCCCB', '#FFFFFF'], // Light red to white (consistent with login page)
+    outputRange: ['#FFFFFF', '#FFFFFF'], // Light red to white (consistent with login page)
   });
 
   const handleSignup = async () => {

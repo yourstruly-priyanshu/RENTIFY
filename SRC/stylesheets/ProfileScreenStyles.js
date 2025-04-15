@@ -4,14 +4,14 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#FFDADA', // Light Red Background
+    backgroundColor: '#FFF', 
     alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#8B0000', // Dark Red Text
+    color: '#000', 
   },
   profilePic: {
     width: 120,
@@ -19,7 +19,7 @@ export default StyleSheet.create({
     borderRadius: 60,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: '#B22222', // Firebrick Red Border
+    borderColor: '#FC6600', 
   },
   profilePlaceholder: {
     width: 120,
@@ -37,15 +37,15 @@ export default StyleSheet.create({
   input: {
     width: '90%',
     height: 50,
-    borderColor: '#B22222', // Firebrick Red Border
+    borderColor: '#FC6600', // Firebrick Red Border
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    backgroundColor: '#FFEEEE', // Very Light Red Input Background
+    backgroundColor: '#FFEEEE', 
   },
   button: {
-    backgroundColor: '#8B0000', // Dark Red Button
+    backgroundColor: '#FC6600', // Dark Red Button
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -57,14 +57,14 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   logoutButton: {
-    backgroundColor: '#8B0000', // Dark Red Button
+    backgroundColor: '#FC6600', // Dark Red Button
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     width: '90%',
     marginTop: 15,
     borderWidth: 1,
-    borderColor: '#8B0000', // Dark Red Border
+    borderColor: '#FC6600', // Dark Red Border
   },
   logoutButtonText: {
     color: '#fff', // Dark Red Text
@@ -89,7 +89,7 @@ export default StyleSheet.create({
     elevation: 5,
   },
   loginButton: {
-    backgroundColor: '#B22222', // Firebrick Red Button
+    backgroundColor: '#FC6600', // Firebrick Red Button
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',

@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#B22222', // Dark red
+    color: '#000', // Dark red
     marginBottom: 10,
   },
   subtitle: {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
   label: {
     alignSelf: 'flex-start',
-    color: '#B22222', // Dark red
+    color: '#000', // Dark red
     fontSize: 14,
     marginBottom: 5,
   },
