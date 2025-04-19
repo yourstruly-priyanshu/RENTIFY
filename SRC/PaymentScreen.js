@@ -23,7 +23,14 @@ const PaymentScreen = () => {
 
   // Determine if we're handling a single product or cart items
   const items = cartItems || (product ? [product] : []);
-  const totalAmount = items.reduce((sum, item) => sum + (item.pricePerDay * (item.quantity || 1)), 0);
+
+  // ✅ Corrected totalAmount calculation
+  const totalAmount = items.reduce((sum, item) => {
+    if (item.totalAmount) {
+      return sum + item.totalAmount;
+    }
+    return sum + (item.pricePerDay * (item.quantity || 1));
+  }, 0);
 
   useEffect(() => {
     const auth = getAuth();
@@ -58,7 +65,7 @@ const PaymentScreen = () => {
         await addDoc(collection(db, "orders"), {
           productId: item.id,
           productName: item.name,
-          amount: item.pricePerDay * (item.quantity || 1),
+          amount: item.totalAmount || (item.pricePerDay * (item.quantity || 1)),
           quantity: item.quantity || 1,
           paymentMethod: method,
           userId: user.uid,
@@ -66,10 +73,10 @@ const PaymentScreen = () => {
           createdAt: serverTimestamp(),
         });
       }
-    }/* catch (error) {
+    } catch (error) {
       console.error("Error creating order:", error);
       Alert.alert("Error", "Failed to process order. Please try again.");
-    } */finally {
+    } finally {
       setIsLoading(false);
       Alert.alert("Success", `Your rental is confirmed via ${method}.`);
       navigation.navigate("Home");
@@ -117,7 +124,7 @@ const PaymentScreen = () => {
         <View key={`${item.id}-${index}`} style={styles.itemContainer}>
           <Text style={styles.productName}>{item.name}</Text>
           <Text style={styles.itemPrice}>
-            ₹{item.pricePerDay * (item.quantity || 1)}
+            ₹{item.totalAmount || (item.pricePerDay * (item.quantity || 1))}
             {item.quantity > 1 ? ` (${item.quantity} × ₹${item.pricePerDay}/day)` : ""}
           </Text>
         </View>
@@ -141,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 60,
-    backgroundColor: "#FFf",
+    backgroundColor: "#FFF",
   },
   loginBoxWrapper: {
     alignItems: "center",

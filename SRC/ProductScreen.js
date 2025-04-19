@@ -6,9 +6,11 @@ import {
   Button,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { db } from "./firebase_config";
 
 const ProductScreen = () => {
@@ -24,11 +26,16 @@ const ProductScreen = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        if (!productId) return;
+        if (!productId) {
+          setLoading(false);
+          return;
+        }
         const productRef = doc(db, "rentalProducts", productId);
         const productSnap = await getDoc(productRef);
         if (productSnap.exists()) {
           setProduct(productSnap.data());
+        } else {
+          console.log("Product does not exist.");
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -39,25 +46,64 @@ const ProductScreen = () => {
   }, [productId]);
 
   const addToCart = useCallback(() => {
-    if (!product) return;
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert("Login Required", "Please log in to add items to your cart.", [
+        { text: "OK", onPress: () => navigation.navigate("LoginScreen") },
+      ]);
+      return;
+    }
+
+    if (!product) {
+      Alert.alert("Error", "Product data is not available.");
+      return;
+    }
+
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    // Calculate number of days
+    const startDate = today;
+    const endDate = tomorrow;
+    const diffTime = Math.abs(endDate - startDate);
+    const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    const totalAmount = (product.pricePerDay || 0) * numberOfDays;
 
     const newItem = {
-      ...product,
       id: productId,
+      name: product.name || "Unnamed Item",
+      pricePerDay: product.pricePerDay || 0,
+      imageUrl: product.imageUrl || "https://via.placeholder.com/80",
+      startDate: today.toISOString(),
+      endDate: tomorrow.toISOString(),
+      totalAmount,
       cartTimestamp: Date.now(),
       quantity: 1,
     };
 
-    // Update state first
+    // Update state
     setCartItems((prevCartItems) => {
       const updatedCart = [...prevCartItems, newItem];
       return updatedCart;
     });
 
-    // Navigate after state update is queued (not during render)
-    setTimeout(() => {
-      navigation.navigate("CartScreen", { cartItems: [...cartItems, newItem] });
-    }, 0);
+    // Save to Firestore
+    const saveToFirestore = async () => {
+      try {
+        const cartRef = collection(db, "users", user.uid, "cart");
+        await addDoc(cartRef, newItem);
+        console.log("Item added to Firestore:", newItem);
+        // Navigate after saving
+        navigation.navigate("CartScreen", { cartItems: [...cartItems, newItem] });
+      } catch (error) {
+        console.error("Error saving to Firestore:", error);
+        Alert.alert("Error", "Failed to add item to cart. Please try again.");
+      }
+    };
+    saveToFirestore();
   }, [product, productId, navigation, cartItems]);
 
   if (loading) {
@@ -100,7 +146,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     alignItems: "center",
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   image: {
     width: "100%",
