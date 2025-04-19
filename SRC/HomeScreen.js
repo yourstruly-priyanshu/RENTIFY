@@ -1,5 +1,4 @@
-// home
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -21,6 +20,7 @@ export default function HomeScreen({ navigation }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const auth = getAuth();
+  const searchInputRef = useRef(null); // Ref to manage TextInput focus
 
   const categories = [
     { name: "Furniture", icon: "bed" },
@@ -55,6 +55,10 @@ export default function HomeScreen({ navigation }) {
         ? products.filter((p) => p.name.toLowerCase().includes(text.toLowerCase()))
         : products
     );
+    // Ensure focus remains on the TextInput
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
 
   const handleCategorySelect = (category) => {
@@ -71,25 +75,15 @@ export default function HomeScreen({ navigation }) {
 
   const handleHomePress = () => {
     setSelectedCategory(null);
+    setSearchText(""); // Clear search when returning to home
     setFilteredProducts(products);
+    if (searchInputRef.current) {
+      searchInputRef.current.focus(); // Refocus after clearing
+    }
   };
 
   const renderHeader = () => (
     <View>
-      {/* Header with Search */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Find Everything for Rent</Text>
-        <View style={styles.searchContainer}>
-          <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Search rentals..."
-            value={searchText}
-            onChangeText={handleSearch}
-          />
-        </View>
-      </View>
-
       {/* Categories */}
       <View style={styles.categoriesWrapper}>
         <FlatList
@@ -113,7 +107,7 @@ export default function HomeScreen({ navigation }) {
               <Text
                 style={[
                   styles.categoryText,
-                  selectedCategory === item.name && { color: "red" },
+                  selectedCategory === item.name && { color: "#fff" }, // Fixed color for selected
                 ]}
               >
                 {item.name}
@@ -134,6 +128,23 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header with Search (Moved outside FlatList) */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Find Everything for Rent</Text>
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
+          <TextInput
+            ref={searchInputRef} // Add ref to manage focus
+            style={styles.searchBar}
+            placeholder="Search rentals..."
+            value={searchText}
+            onChangeText={handleSearch}
+            autoFocus={false} // Prevent auto-focus on mount if not desired
+            returnKeyType="search" // Optional: Improves UX
+          />
+        </View>
+      </View>
+
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id}
