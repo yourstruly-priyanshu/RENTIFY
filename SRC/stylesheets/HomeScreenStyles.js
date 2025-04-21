@@ -1,79 +1,106 @@
-//styles
-import { StyleSheet, StatusBar, Platform } from "react-native";
+import { StyleSheet, StatusBar, Platform, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F9F9",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-  },
-
-  /* 🔝 Header */
-  header: {
-    backgroundColor: "#FF4500",
-    padding: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
   },
 
   /* 🔍 Search Bar */
   searchContainer: {
     flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 50,
-    padding: 10,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 25,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
     alignItems: "center",
-    marginTop: 10,
+    margin: 15,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   searchIcon: {
     marginRight: 10,
+    color: "#777",
   },
   searchBar: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
+    color: "#333",
   },
 
-  /* 📦 Categories */
+  /* 📸 Banners */
+  bannerContainer: {
+    height: 220,
+  },
+  bannerImage: {
+    width: width,
+    height: 220,
+    resizeMode: "cover",
+    borderRadius: 12,
+  },
+
+  /* 🎁 Discount */
+  discountImage: {
+    width: width - 30,
+    height: 100,
+    alignSelf: "center",
+    marginVertical: 12,
+    borderRadius: 10,
+  },
+
+  /* 🧭 Categories */
   categoriesWrapper: {
-    padding: 15,
+    paddingHorizontal: 15,
+    marginVertical: 10,
   },
   categoryBox: {
     alignItems: "center",
     marginRight: 15,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#EEEEEE",
     padding: 10,
     borderRadius: 10,
-    elevation: 2,
+    elevation: 1,
+  },
+  selectedCategory: {
+    backgroundColor: "#5C6BC0",
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 13,
     marginTop: 5,
+    color: "#333",
   },
 
-  /* 🏷️ Sections */
+  /* 🏷️ Section */
   sectionWrapper: {
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontWeight: "600",
+    color: "#1A1A1A",
   },
+
+  /* 📦 Products */
   gridWrapper: {
     justifyContent: "space-between",
+    paddingHorizontal: 15,
   },
   productCard: {
     width: "48%",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
     elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
   },
   productImage: {
     width: "100%",
@@ -82,37 +109,44 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 5,
+    fontWeight: "600",
+    marginTop: 8,
+    color: "#333",
   },
   productPrice: {
     fontSize: 14,
-    color: "#FF4500",
+    color: "#5C6BC0",
+    fontWeight: "bold",
   },
 
-  /* 🛒 Floating Cart */
+  /* 🛒 Cart */
   floatingCart: {
     position: "absolute",
-    bottom: 80,
+    bottom: 90,
     right: 20,
-    backgroundColor: "#FF4500",
+    backgroundColor: "#5C6BC0",
     padding: 15,
     borderRadius: 50,
+    elevation: 5,
   },
 
-  /* 🔽 Bottom Navigation */
+  /* 🧭 Footer Nav */
   bottomNav: {
     flexDirection: "row",
-    backgroundColor: "#FF4500",
-    padding: 15,
+    backgroundColor: "#1E1E1E",
+    paddingVertical: 15,
     justifyContent: "space-around",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 10,
   },
   navItem: {
     alignItems: "center",
   },
   navText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 12,
+    marginTop: 3,
   },
 });
 

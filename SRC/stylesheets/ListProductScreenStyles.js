@@ -1,17 +1,16 @@
-//styles
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#fff', 
+    backgroundColor: '#F9F9F9',
     alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000000', 
+    color: '#1E1E1E',
     marginBottom: 20,
   },
   productImage: {
@@ -21,7 +20,7 @@ export default StyleSheet.create({
     marginRight: 10,
   },
   uploadButton: {
-    backgroundColor: '#FC6600', // Red button
+    backgroundColor: '#5C6BC0',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
@@ -34,15 +33,16 @@ export default StyleSheet.create({
   input: {
     width: '90%',
     height: 50,
-    borderColor: '#FC6600', // Dark red border
+    borderColor: '#5C6BC0',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    backgroundColor: '#FFF', // White input background
+    backgroundColor: '#FFF',
+    color: '#1E1E1E',
   },
   button: {
-    backgroundColor: '#FC6600', // Red button
+    backgroundColor: '#5C6BC0',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -55,7 +55,7 @@ export default StyleSheet.create({
   notLoggedInText: {
     fontSize: 18,
     textAlign: 'center',
-    color: '#8B0000', // Dark red text
+    color: '#1E1E1E',
     marginBottom: 10,
   },
   loginBox: {
@@ -70,7 +70,7 @@ export default StyleSheet.create({
     elevation: 5,
   },
   loginButton: {
-    backgroundColor: '#FC6600', // Red button
+    backgroundColor: '#5C6BC0',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',

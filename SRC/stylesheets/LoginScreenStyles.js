@@ -1,4 +1,3 @@
-//styles
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -7,7 +6,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#FFCCCB', // Light red background
+    backgroundColor: '#F9F9F9',
   },
   scrollContainer: {
     justifyContent: 'center',
@@ -20,17 +19,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF', // White background for the image container
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    overflow: 'hidden', // Ensures the image is clipped to the container
-    shadowColor: '#000', // Optional: Add shadow for better visibility
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   image: {
     width: '120%',
@@ -39,39 +38,41 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#B22222', // Dark red
+    color: '#1E1E1E',
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#B22222', // Dark red
+    color: '#1E1E1E',
     marginBottom: 10,
   },
   label: {
     alignSelf: 'flex-start',
-    color: '#B22222', // Dark red
+    color: '#1E1E1E',
     marginBottom: 5,
   },
   input: {
-    width: width * 0.9,
+    width: width * 0.89,
     height: 50,
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
-    backgroundColor: '#FFFFFF', // White background for input
-    color: '#000', // Black text
+    backgroundColor: '#FFFFFF',
+    color: '#1E1E1E',
+    borderColor: '#5C6BC0',
+    borderWidth: 1,
   },
   button: {
     width: '100%',
     paddingVertical: 15,
     borderWidth: 2,
-    borderColor: '#B22222', // Dark red border
+    borderColor: '#5C6BC0',
     borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#FF6347', // Tomato color for button
+    backgroundColor: '#5C6BC0',
   },
   buttonText: {
-    color: '#FFFFFF', // White text for button
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: '#B22222', // Dark red
+    color: '#5C6BC0',
     marginTop: 15,
     fontSize: 16,
     textDecorationLine: 'underline',

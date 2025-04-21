@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -14,13 +16,20 @@ import { db } from "./firebase_config";
 import Icon from "react-native-vector-icons/FontAwesome";
 import styles from "./stylesheets/HomeScreenStyles";
 
+const bannerImages = [
+  require("./assets/banner1.png"),
+  require("./assets/banner2.png"),
+  require("./assets/banner3.png"),
+];
+
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const scrollRef = useRef(null);
+  const [bannerIndex, setBannerIndex] = useState(0);
   const auth = getAuth();
-  const searchInputRef = useRef(null); // Ref to manage TextInput focus
 
   const categories = [
     { name: "Furniture", icon: "bed" },
@@ -48,6 +57,18 @@ export default function HomeScreen({ navigation }) {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextIndex = (bannerIndex + 1) % bannerImages.length;
+      scrollRef.current?.scrollTo({
+        x: nextIndex * Dimensions.get("window").width,
+        animated: true,
+      });
+      setBannerIndex(nextIndex);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [bannerIndex]);
+
   const handleSearch = (text) => {
     setSearchText(text);
     setFilteredProducts(
@@ -55,10 +76,6 @@ export default function HomeScreen({ navigation }) {
         ? products.filter((p) => p.name.toLowerCase().includes(text.toLowerCase()))
         : products
     );
-    // Ensure focus remains on the TextInput
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
   };
 
   const handleCategorySelect = (category) => {
@@ -75,16 +92,53 @@ export default function HomeScreen({ navigation }) {
 
   const handleHomePress = () => {
     setSelectedCategory(null);
-    setSearchText(""); // Clear search when returning to home
     setFilteredProducts(products);
-    if (searchInputRef.current) {
-      searchInputRef.current.focus(); // Refocus after clearing
-    }
   };
 
   const renderHeader = () => (
     <View>
-      {/* Categories */}
+      {/* 🔍 Search Bar */}
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={18} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search rentals..."
+          placeholderTextColor="#999"
+          value={searchText}
+          onChangeText={handleSearch}
+        />
+      </View>
+
+      {/* 📸 Banners */}
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        ref={scrollRef}
+        style={styles.bannerContainer}
+      >
+        {bannerImages.map((img, idx) => (
+          <Image key={idx} source={img} style={styles.bannerImage} />
+        ))}
+      </ScrollView>
+
+      {/* 🎁 10% OFF Promo - updated as black/white box */}
+      <View
+        style={{
+          backgroundColor: "#000",
+          paddingVertical: 15,
+          paddingHorizontal: 20,
+          borderRadius: 10,
+          margin: 15,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+          10% OFF for new customers!
+        </Text>
+      </View>
+
+      {/* 🧭 Categories */}
       <View style={styles.categoriesWrapper}>
         <FlatList
           horizontal
@@ -102,12 +156,12 @@ export default function HomeScreen({ navigation }) {
               <Icon
                 name={item.icon}
                 size={24}
-                color={selectedCategory === item.name ? "#fff" : "#FF4500"}
+                color={selectedCategory === item.name ? "#fff" : "#000"}
               />
               <Text
                 style={[
                   styles.categoryText,
-                  selectedCategory === item.name && { color: "#fff" }, // Fixed color for selected
+                  selectedCategory === item.name && { color: "#fff" },
                 ]}
               >
                 {item.name}
@@ -117,10 +171,9 @@ export default function HomeScreen({ navigation }) {
         />
       </View>
 
-      {/* Section Title */}
       <View style={styles.sectionWrapper}>
         <Text style={styles.sectionTitle}>
-          {selectedCategory ? `${selectedCategory} Rentals` : "Popular Rentals"}
+          {selectedCategory ? `${selectedCategory} Rentals` : "Best Sellers"}
         </Text>
       </View>
     </View>
@@ -128,23 +181,6 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Search (Moved outside FlatList) */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Find Everything for Rent</Text>
-        <View style={styles.searchContainer}>
-          <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
-          <TextInput
-            ref={searchInputRef} // Add ref to manage focus
-            style={styles.searchBar}
-            placeholder="Search rentals..."
-            value={searchText}
-            onChangeText={handleSearch}
-            autoFocus={false} // Prevent auto-focus on mount if not desired
-            returnKeyType="search" // Optional: Improves UX
-          />
-        </View>
-      </View>
-
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id}
@@ -164,7 +200,7 @@ export default function HomeScreen({ navigation }) {
         )}
       />
 
-      {/* Floating Cart Button */}
+      {/* 🛒 Floating Cart */}
       <TouchableOpacity
         style={styles.floatingCart}
         onPress={() => navigation.navigate("CartScreen")}
@@ -172,7 +208,7 @@ export default function HomeScreen({ navigation }) {
         <Icon name="shopping-cart" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {/* Bottom Navigation */}
+      {/* ⬇️ Footer Nav */}
       <View style={styles.bottomNav}>
         {[
           { name: "Home", icon: "home", action: handleHomePress },
@@ -186,7 +222,7 @@ export default function HomeScreen({ navigation }) {
             style={styles.navItem}
             onPress={() => (item.action ? item.action() : navigation.navigate(item.name))}
           >
-            <Icon name={item.icon} size={24} color="white" />
+            <Icon name={item.icon} size={22} color="#fff" />
             <Text style={styles.navText}>{item.name}</Text>
           </TouchableOpacity>
         ))}

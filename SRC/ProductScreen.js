@@ -3,10 +3,11 @@ import {
   View,
   Text,
   Image,
-  Button,
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Pressable,
+  ScrollView,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
@@ -22,7 +23,6 @@ const ProductScreen = () => {
   const [loading, setLoading] = useState(true);
   const [cartItems, setCartItems] = useState(route.params?.cartItems || []);
 
-  // Fetch product data
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -65,11 +65,7 @@ const ProductScreen = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // Calculate number of days
-    const startDate = today;
-    const endDate = tomorrow;
-    const diffTime = Math.abs(endDate - startDate);
-    const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    const numberOfDays = Math.ceil(Math.abs(tomorrow - today) / (1000 * 60 * 60 * 24)) || 1;
     const totalAmount = (product.pricePerDay || 0) * numberOfDays;
 
     const newItem = {
@@ -84,19 +80,12 @@ const ProductScreen = () => {
       quantity: 1,
     };
 
-    // Update state
-    setCartItems((prevCartItems) => {
-      const updatedCart = [...prevCartItems, newItem];
-      return updatedCart;
-    });
+    setCartItems((prev) => [...prev, newItem]);
 
-    // Save to Firestore
     const saveToFirestore = async () => {
       try {
         const cartRef = collection(db, "users", user.uid, "cart");
         await addDoc(cartRef, newItem);
-        console.log("Item added to Firestore:", newItem);
-        // Navigate after saving
         navigation.navigate("CartScreen", { cartItems: [...cartItems, newItem] });
       } catch (error) {
         console.error("Error saving to Firestore:", error);
@@ -107,7 +96,7 @@ const ProductScreen = () => {
   }, [product, productId, navigation, cartItems]);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="#5C6BC0" style={{ marginTop: 100 }} />;
   }
 
   if (!product) {
@@ -115,7 +104,7 @@ const ProductScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Image source={{ uri: product.imageUrl }} style={styles.image} />
       <Text style={styles.title}>{product.name}</Text>
       <Text style={styles.category}>{product.category}</Text>
@@ -124,70 +113,99 @@ const ProductScreen = () => {
       <Text style={styles.location}>📍 {product.location}</Text>
 
       <View style={styles.buttonWrapper}>
-        <Button
-          title="Rent Now"
+        <Pressable
+          style={({ pressed }) => [
+            styles.rentButton,
+            { opacity: pressed ? 0.85 : 1 },
+          ]}
           onPress={() => navigation.navigate("Payment", { product })}
-          color="#ff6600"
-        />
+        >
+          <Text style={styles.buttonText}>Rent Now</Text>
+        </Pressable>
       </View>
       <View style={styles.buttonWrapper}>
-        <Button
-          title="Add to Cart"
+        <Pressable
+          style={({ pressed }) => [
+            styles.cartButton,
+            { opacity: pressed ? 0.85 : 1 },
+          ]}
           onPress={addToCart}
-          color="#007bff"
-        />
+        >
+          <Text style={styles.buttonText}>Add to Cart</Text>
+        </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#F9F9F9",
   },
   image: {
     width: "100%",
     height: 250,
     resizeMode: "cover",
-    borderRadius: 10,
+    borderRadius: 12,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    marginTop: 10,
+    color: "#1E1E1E",
+    marginBottom: 4,
   },
   category: {
-    fontSize: 18,
-    color: "gray",
+    fontSize: 16,
+    color: "#5C6BC0",
+    marginBottom: 10,
   },
   description: {
     fontSize: 16,
-    marginTop: 10,
+    color: "#333",
     textAlign: "center",
+    marginBottom: 10,
   },
   price: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "green",
-    marginTop: 5,
+    color: "#43A047",
+    marginBottom: 5,
   },
   location: {
     fontSize: 16,
-    color: "blue",
+    color: "#0288D1",
+    marginBottom: 20,
+  },
+  buttonWrapper: {
     marginTop: 10,
+    width: "80%",
+  },
+  rentButton: {
+    backgroundColor: "#5C6BC0",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  cartButton: {
+    backgroundColor: "#FF7043",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textTransform: "uppercase",
   },
   errorText: {
     fontSize: 18,
     color: "red",
     textAlign: "center",
     marginTop: 200,
-  },
-  buttonWrapper: {
-    marginTop: 20,
-    width: "60%",
   },
 });
 
