@@ -1,6 +1,8 @@
 import { StyleSheet, StatusBar, Platform, Dimensions } from "react-native";
 
+
 const { width } = Dimensions.get("window");
+
 
 const styles = StyleSheet.create({
   container: {
@@ -8,6 +10,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9F9F9",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
+
 
   /* 🔍 Search Bar */
   searchContainer: {
@@ -33,16 +36,18 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
+
   /* 📸 Banners */
   bannerContainer: {
-    height: 220,
+    height: 150,
   },
   bannerImage: {
     width: width,
-    height: 220,
+    height: 150,
     resizeMode: "cover",
     borderRadius: 12,
   },
+
 
   /* 🎁 Discount */
   discountImage: {
@@ -52,6 +57,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     borderRadius: 10,
   },
+
 
   /* 🧭 Categories */
   categoriesWrapper: {
@@ -75,6 +81,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
+
   /* 🏷️ Section */
   sectionWrapper: {
     paddingHorizontal: 15,
@@ -85,6 +92,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1A1A1A",
   },
+
 
   /* 📦 Products */
   gridWrapper: {
@@ -119,6 +127,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+
   /* 🛒 Cart */
   floatingCart: {
     position: "absolute",
@@ -129,6 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     elevation: 5,
   },
+
 
   /* 🧭 Footer Nav */
   bottomNav: {
@@ -150,4 +160,10 @@ const styles = StyleSheet.create({
   },
 });
 
+
 export default styles;
+
+
+
+
+
