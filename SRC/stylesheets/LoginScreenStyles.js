@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: '#D3D3D3', // Changed to grey for login screen
   },
   scrollContainer: {
     justifyContent: 'center',
@@ -69,7 +69,17 @@ const styles = StyleSheet.create({
     borderColor: '#5C6BC0',
     borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#5C6BC0',
+    backgroundColor: '#5C6BC0', // Default color for regular buttons
+  },
+  googleButton: {
+    width: '100%',
+    paddingVertical: 15,
+    borderWidth: 2,
+    borderColor: '#5C6BC0',
+    borderRadius: 10,
+    alignItems: 'center',
+    // Multi-color changing will be handled via state/animation (see component comment)
+    backgroundColor: '#DB4437', // Default Google red as starting color
   },
   buttonText: {
     color: '#FFFFFF',

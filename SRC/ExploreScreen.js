@@ -67,8 +67,19 @@ const ExploreScreen = ({ navigation }) => {
             ]}
             onPress={() => handleCategoryChange(category.name)}
           >
-            <Icon name={category.icon} size={24} color="#FF4500" />
-            <Text style={styles.categoryText}>{category.name}</Text>
+            <Icon
+              name={category.icon}
+              size={24}
+              color={selectedCategory === category.name ? '#FFFFFF' : '#1A1A1A'} // White when selected, black otherwise
+            />
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === category.name && styles.selectedCategoryText,
+              ]}
+            >
+              {category.name}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -92,7 +103,7 @@ const ExploreScreen = ({ navigation }) => {
                   <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
                   <View style={styles.productInfo}>
                     <Text style={styles.productName}>{item.name}</Text>
-                    
+
                     {/* Show correct discount labels */}
                     {selectedCategory === 'Discounts' && (
                       <Text style={styles.discountText}>10% OFF</Text>
