@@ -75,39 +75,40 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
   notLoggedInText: {
-    fontSize: 18,
+    fontSize: 16, // Changed to match ProfileScreen
     textAlign: 'center',
-    color: '#1A1A1A',
-    marginBottom: 10,
+    color: '#E0E0E0', // Changed to match ProfileScreen
+    marginBottom: 15, // Changed to match ProfileScreen
   },
   loginBox: {
-    width: '90%',
+    width: '100%', // Changed to match ProfileScreen
     padding: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    borderRadius: 12, // Changed to match ProfileScreen
+    backgroundColor: '#2A2A2A', // Changed to match ProfileScreen
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
+    marginTop: 50, // Added to match ProfileScreen
   },
   loginButton: {
-    backgroundColor: '#5C6BC0',
-    padding: 10,
+    backgroundColor: '#D3D3D3', // Changed to match ProfileScreen
+    paddingVertical: 12, // Changed to match ProfileScreen
+    paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: 'center',
     width: '100%',
-    shadowColor: '#000000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    alignItems: 'center',
+    marginVertical: 10, // Added to match ProfileScreen
+    elevation: 2, // Changed to match ProfileScreen
   },
   loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#000000', // Changed to match ProfileScreen
+    fontWeight: '600', // Changed to match ProfileScreen
+    fontSize: 16, // Changed to match ProfileScreen
+  },
+  goToLoginText: {
+    fontSize: 16, // Changed to match ProfileScreen's text style
+    textAlign: 'center',
+    color: '#E0E0E0', // Changed to match ProfileScreen's notLoggedInText
+    fontWeight: '600', // Changed to match ProfileScreen's buttonText
+    marginVertical: 10, // Changed to match ProfileScreen's button spacing
   },
   modalOverlay: {
     flex: 1,
@@ -139,8 +140,6 @@ export default StyleSheet.create({
     fontSize: 16,
     color: '#333333',
   },
-
-  // New style changes for location input with icon
   locationInputContainer: {
     width: '90%',
     flexDirection: 'row',
