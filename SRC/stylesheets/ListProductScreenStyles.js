@@ -9,8 +9,8 @@ export default StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1E1E1E',
+    fontWeight: '600',
+    color: '#1A1A1A',
     marginBottom: 20,
   },
   productImage: {
@@ -25,21 +25,38 @@ export default StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginVertical: 10,
+    shadowColor: '#000000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   uploadButtonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   input: {
     width: '90%',
     height: 50,
-    borderColor: '#5C6BC0',
-    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 15,
-    backgroundColor: '#FFF',
-    color: '#1E1E1E',
+    backgroundColor: '#FFFFFF',
+    color: '#333333',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  inputText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#999999',
   },
   button: {
     backgroundColor: '#5C6BC0',
@@ -47,38 +64,109 @@ export default StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     width: '90%',
+    shadowColor: '#000000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   buttonText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   notLoggedInText: {
-    fontSize: 18,
+    fontSize: 16, // Changed to match ProfileScreen
     textAlign: 'center',
-    color: '#1E1E1E',
-    marginBottom: 10,
+    color: '#E0E0E0', // Changed to match ProfileScreen
+    marginBottom: 15, // Changed to match ProfileScreen
   },
   loginBox: {
-    width: '90%',
+    width: '100%', // Changed to match ProfileScreen
     padding: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFF',
+    borderRadius: 12, // Changed to match ProfileScreen
+    backgroundColor: '#2A2A2A', // Changed to match ProfileScreen
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    marginTop: 50, // Added to match ProfileScreen
   },
   loginButton: {
-    backgroundColor: '#5C6BC0',
-    padding: 10,
+    backgroundColor: '#D3D3D3', // Changed to match ProfileScreen
+    paddingVertical: 12, // Changed to match ProfileScreen
+    paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: 'center',
     width: '100%',
+    alignItems: 'center',
+    marginVertical: 10, // Added to match ProfileScreen
+    elevation: 2, // Changed to match ProfileScreen
   },
   loginButtonText: {
-    color: '#FFF',
+    color: '#000000', // Changed to match ProfileScreen
+    fontWeight: '600', // Changed to match ProfileScreen
+    fontSize: 16, // Changed to match ProfileScreen
+  },
+  goToLoginText: {
+    fontSize: 16, // Changed to match ProfileScreen's text style
+    textAlign: 'center',
+    color: '#E0E0E0', // Changed to match ProfileScreen's notLoggedInText
+    fontWeight: '600', // Changed to match ProfileScreen's buttonText
+    marginVertical: 10, // Changed to match ProfileScreen's button spacing
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '50%',
+    padding: 10,
+    shadowColor: '#000000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+  categoryList: {
+    width: '100%',
+  },
+  categoryItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  categoryText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#333333',
+  },
+  locationInputContainer: {
+    width: '90%',
+    flexDirection: 'row',
+    marginBottom: 15,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  locationInput: {
+    width: '80%',
+    height: 50,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#FFFFFF',
+    color: '#333333',
+    shadowColor: '#000000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  locationIconButton: {
+    width: '18%',
+    height: 50,
+    backgroundColor: '#5C6BC0',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
   },
 });

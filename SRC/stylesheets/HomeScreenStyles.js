@@ -39,11 +39,11 @@ const styles = StyleSheet.create({
 
   /* 📸 Banners */
   bannerContainer: {
-    height: 150,
+    height: 220,
   },
   bannerImage: {
     width: width,
-    height: 150,
+    height: 220,
     resizeMode: "cover",
     borderRadius: 12,
   },
