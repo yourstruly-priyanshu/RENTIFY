@@ -3,13 +3,12 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
-  FlatList,
+  ScrollView,
   Platform,
   Image,
   View,
   Text,
 } from 'react-native';
-
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase_config';
 import styles from './stylesheets/LoginScreenStyles';
@@ -27,73 +26,18 @@ export default function LoginScreen({ navigation }) {
         navigation.replace("Home");
       })
       .catch(error => {
-        console.error("❌ Login error:", error);
-        setError(error.message);
+        const credentialErrors = [
+          'auth/user-not-found',
+          'auth/wrong-password',
+          'auth/invalid-email',
+        ];
+        if (credentialErrors.includes(error.code)) {
+          setError('Invalid email or password');
+        } else {
+          setError('Something went wrong. Please try again.');
+        }
       });
   };
-
-  const renderItem = () => (
-    <View style={styles.scrollContainer}>
-      {/* Logo */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('./assets/logo2.png')}
-          style={styles.image}
-          resizeMode="contain"
-        />
-      </View>
-
-      {/* Title */}
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>Sign in to continue.</Text>
-
-      {/* Error message */}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {/* Email Input */}
-      <Text style={styles.label}>EMAIL</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="hello@reallygreatsite.com"
-        placeholderTextColor="#ccc"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      {/* Password Input */}
-      <Text style={styles.label}>PASSWORD</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        placeholderTextColor="#ccc"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      {/* Login Button */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      {/* Links */}
-      <Text
-        style={styles.link}
-        onPress={() => navigation.navigate('SignupScreen')}
-      >
-        Sign up
-      </Text>
-
-      <Text
-        style={styles.link}
-        onPress={() => navigation.navigate('ForgotPasswordScreen')}
-      >
-        Forgot Password?
-      </Text>
-    </View>
-  );
 
   return (
     <View style={[styles.container, { backgroundColor: '#FFFFFF', flex: 1 }]}>
@@ -101,13 +45,69 @@ export default function LoginScreen({ navigation }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <FlatList
-          data={[{}]} // Dummy data for FlatList
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{ flexGrow: 1 }}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
-        />
+        >
+          {/* Logo */}
+          <View style={styles.imageContainer}>
+            <Image
+              source={require('./assets/logo2.png')}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          </View>
+
+          {/* Title */}
+          <Text style={styles.title}>Login</Text>
+          <Text style={styles.subtitle}>Sign in to continue.</Text>
+
+          {/* Error */}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {/* Email */}
+          <Text style={styles.label}>EMAIL</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="hello@reallygreatsite.com"
+            placeholderTextColor="#ccc"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          {/* Password */}
+          <Text style={styles.label}>PASSWORD</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            placeholderTextColor="#ccc"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          {/* Button */}
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+
+          {/* Links */}
+          <Text
+            style={styles.link}
+            onPress={() => navigation.navigate('SignupScreen')}
+          >
+            Sign up
+          </Text>
+
+          <Text
+            style={styles.link}
+            onPress={() => navigation.navigate('ForgotPasswordScreen')}
+          >
+            Forgot Password?
+          </Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );

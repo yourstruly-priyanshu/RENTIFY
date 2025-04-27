@@ -1,13 +1,12 @@
-// signin signup
 import React, { useState, useEffect } from 'react';
-import { 
-  TextInput, TouchableOpacity, Text, View, Animated, 
-  KeyboardAvoidingView, ScrollView, Platform 
+import {
+  TextInput, TouchableOpacity, Text, View, Animated,
+  KeyboardAvoidingView, ScrollView, Platform
 } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './firebase_config';
-import { collection, addDoc } from 'firebase/firestore';
-import styles from './stylesheets/SignupScreenStyles'; 
+import { doc, setDoc } from 'firebase/firestore';
+import styles from './stylesheets/SignupScreenStyles';
 
 export default function SignupScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -37,7 +36,7 @@ export default function SignupScreen({ navigation }) {
 
   const interpolateColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#FFFFFF', '#FFFFFF'], // Light red to white (consistent with login page)
+    outputRange: ['#FFFFFF', '#FFFFFF'],
   });
 
   const handleSignup = async () => {
@@ -49,13 +48,16 @@ export default function SignupScreen({ navigation }) {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await addDoc(collection(db, 'users'), {
-        uid: userCredential.user.uid,
+      const uid = userCredential.user.uid;
+
+      await setDoc(doc(db, 'users', uid), {
+        uid,
         name,
         dob,
         contact,
         email,
       });
+
       navigation.navigate('Home');
     } catch (err) {
       setError(err.message);
@@ -89,7 +91,7 @@ export default function SignupScreen({ navigation }) {
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
 
-          <Text style={styles.link} onPress={() => navigation.navigate('Login')}>Already have an account? Login</Text>
+          <Text style={styles.link} onPress={() => navigation.navigate('LoginScreen')}>Already have an account? Login</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </Animated.View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { getAuth } from "firebase/auth";
 import { db } from "./firebase_config";
 import Icon from "react-native-vector-icons/FontAwesome";
 import styles from "./stylesheets/HomeScreenStyles";
+import { debounce } from "lodash"; // npm install lodash
 
 const bannerImages = [
   require("./assets/banner1.png"),
@@ -28,7 +29,6 @@ export default function HomeScreen({ navigation }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const scrollRef = useRef(null);
-  const [bannerIndex, setBannerIndex] = useState(0);
   const auth = getAuth();
 
   const categories = [
@@ -59,23 +59,32 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const nextIndex = (bannerIndex + 1) % bannerImages.length;
+      const nextIndex = (scrollRef.current?.contentOffset?.x || 0) / Dimensions.get("window").width + 1;
       scrollRef.current?.scrollTo({
-        x: nextIndex * Dimensions.get("window").width,
+        x: (nextIndex % bannerImages.length) * Dimensions.get("window").width,
         animated: true,
       });
-      setBannerIndex(nextIndex);
     }, 5000);
     return () => clearInterval(interval);
-  }, [bannerIndex]);
+  }, []);
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((text) => {
+        setFilteredProducts(
+          text
+            ? products.filter((p) =>
+                p.name.toLowerCase().includes(text.toLowerCase())
+              )
+            : products
+        );
+      }, 300),
+    [products]
+  );
 
   const handleSearch = (text) => {
     setSearchText(text);
-    setFilteredProducts(
-      text
-        ? products.filter((p) => p.name.toLowerCase().includes(text.toLowerCase()))
-        : products
-    );
+    debouncedSearch(text);
   };
 
   const handleCategorySelect = (category) => {
@@ -95,88 +104,87 @@ export default function HomeScreen({ navigation }) {
     setFilteredProducts(products);
   };
 
-  const renderHeader = () => (
-    <View>
-      {/* 🔍 Search Bar */}
-      <View style={styles.searchContainer}>
-        <Icon name="search" size={18} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search rentals..."
-          placeholderTextColor="#999"
-          value={searchText}
-          onChangeText={handleSearch}
-        />
-      </View>
+  const renderHeader = useMemo(
+    () => () => (
+      <View>
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={18} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search rentals..."
+            placeholderTextColor="#999"
+            value={searchText}
+            onChangeText={handleSearch}
+          />
+        </View>
 
-      {/* 📸 Banners */}
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        ref={scrollRef}
-        style={styles.bannerContainer}
-      >
-        {bannerImages.map((img, idx) => (
-          <Image key={idx} source={img} style={styles.bannerImage} />
-        ))}
-      </ScrollView>
-
-      {/* 🎁 10% OFF Promo - updated as black/white box */}
-      <View
-        style={{
-          backgroundColor: "#000",
-          paddingVertical: 15,
-          paddingHorizontal: 20,
-          borderRadius: 10,
-          margin: 15,
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-          10% OFF for new customers!
-        </Text>
-      </View>
-
-      {/* 🧭 Categories */}
-      <View style={styles.categoriesWrapper}>
-        <FlatList
+        <ScrollView
           horizontal
+          pagingEnabled
           showsHorizontalScrollIndicator={false}
-          data={categories}
-          keyExtractor={(item) => item.name}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.categoryBox,
-                selectedCategory === item.name && styles.selectedCategory,
-              ]}
-              onPress={() => handleCategorySelect(item.name)}
-            >
-              <Icon
-                name={item.icon}
-                size={24}
-                color={selectedCategory === item.name ? "#fff" : "#000"}
-              />
-              <Text
-                style={[
-                  styles.categoryText,
-                  selectedCategory === item.name && { color: "#fff" },
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+          ref={scrollRef}
+          style={styles.bannerContainer}
+        >
+          {bannerImages.map((img, idx) => (
+            <Image key={idx} source={img} style={styles.bannerImage} />
+          ))}
+        </ScrollView>
 
-      <View style={styles.sectionWrapper}>
-        <Text style={styles.sectionTitle}>
-          {selectedCategory ? `${selectedCategory} Rentals` : "Best Sellers"}
-        </Text>
+        <View
+          style={{
+            backgroundColor: "#000",
+            paddingVertical: 15,
+            paddingHorizontal: 20,
+            borderRadius: 10,
+            margin: 15,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+            10% OFF for new customers!
+          </Text>
+        </View>
+
+        <View style={styles.categoriesWrapper}>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={categories}
+            keyExtractor={(item) => item.name}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.categoryBox,
+                  selectedCategory === item.name && styles.selectedCategory,
+                ]}
+                onPress={() => handleCategorySelect(item.name)}
+              >
+                <Icon
+                  name={item.icon}
+                  size={24}
+                  color={selectedCategory === item.name ? "#fff" : "#000"}
+                />
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === item.name && { color: "#fff" },
+                  ]}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+
+        <View style={styles.sectionWrapper}>
+          <Text style={styles.sectionTitle}>
+            {selectedCategory ? `${selectedCategory} Rentals` : "Best Sellers"}
+          </Text>
+        </View>
       </View>
-    </View>
+    ),
+    [searchText, selectedCategory]
   );
 
   return (
@@ -187,7 +195,7 @@ export default function HomeScreen({ navigation }) {
         numColumns={2}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={styles.gridWrapper}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderHeader()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.productCard}
@@ -200,7 +208,6 @@ export default function HomeScreen({ navigation }) {
         )}
       />
 
-      {/* 🛒 Floating Cart */}
       <TouchableOpacity
         style={styles.floatingCart}
         onPress={() => navigation.navigate("CartScreen")}
@@ -208,7 +215,6 @@ export default function HomeScreen({ navigation }) {
         <Icon name="shopping-cart" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {/* ⬇️ Footer Nav */}
       <View style={styles.bottomNav}>
         {[
           { name: "Home", icon: "home", action: handleHomePress },

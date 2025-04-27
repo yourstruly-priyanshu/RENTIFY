@@ -64,7 +64,6 @@ const ChatScreen = ({ navigation }) => {
         setUserData({ orders, preferences });
         setMessages(messagesList);
       } catch (error) {
-        console.error('Error fetching user data:', error);
       }
     };
 

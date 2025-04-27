@@ -32,7 +32,6 @@ const ExploreScreen = ({ navigation }) => {
 
       setProducts(productList);
     } catch (error) {
-      console.error(`Error fetching products from ${collectionName}:`, error);
     } finally {
       setLoading(false);
     }

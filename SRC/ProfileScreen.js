@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, TouchableOpacity, Text, View, Image, Alert, StyleSheet } from 'react-native';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import {
+  TextInput,
+  TouchableOpacity,
+  Text,
+  View,
+  Image,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  Modal,
+} from 'react-native';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from 'firebase/auth';
 import { auth, db, storage } from './firebase_config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,26 +35,66 @@ export default function ProfileScreen({ navigation }) {
   const [profileImage, setProfileImage] = useState(null);
   const [savePressed, setSavePressed] = useState(false);
   const [logoutPressed, setLogoutPressed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isReauthModalVisible, setIsReauthModalVisible] = useState(false);
+  const [reauthPassword, setReauthPassword] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log('onAuthStateChanged triggered, user:', currentUser ? currentUser.uid : 'null');
       setUser(currentUser);
       if (currentUser) {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setName(data.name || '');
-          setDob(data.dob || '');
-          setContact(data.contact || '');
-          setEmail(data.email || '');
-          setLocation(data.location || '');
-          setProfileImage(data.profileImage || null);
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          console.log('Fetching user document from Firestore at path:', `users/${currentUser.uid}`);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            console.log('User data fetched:', data);
+            setName(data.name || '');
+            setDob(data.dob || '');
+            setContact(data.contact || '');
+            setEmail(data.email || currentUser.email || '');
+            setLocation(data.location || '');
+            setProfileImage(data.profileImage || null);
+            if (!data.name && !data.dob && !data.contact) {
+              console.log('Profile incomplete, prompting user to save profile.');
+              Alert.alert(
+                'Complete Your Profile',
+                'Please fill in your name, date of birth, and contact details to complete your profile.'
+              );
+            }
+          } else {
+            console.log('No user document found in Firestore for UID:', currentUser.uid);
+            setEmail(currentUser.email || '');
+            Alert.alert(
+              'Profile Not Found',
+              'No profile exists. Please fill in your details and save to create your profile.'
+            );
+          }
+        } catch (error) {
+          console.error('Error fetching user document:', error);
+          if (error.code === 'permission-denied') {
+            Alert.alert(
+              'Permission Error',
+              'Unable to access profile data due to Firestore permissions. Please ensure Firestore rules allow access or contact support.'
+            );
+          } else {
+            Alert.alert('Error', 'Failed to load profile data: ' + error.message);
+          }
         }
+      } else {
+        console.log('No authenticated user found.');
+        navigation.navigate('LoginScreen');
       }
+      setLoading(false);
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      console.log('Cleaning up onAuthStateChanged listener');
+      unsubscribe();
+    };
+  }, [navigation]);
 
   const handleSave = async () => {
     if (!user) {
@@ -46,22 +103,36 @@ export default function ProfileScreen({ navigation }) {
       return;
     }
 
+    if (!name || !dob || !contact) {
+      Alert.alert('Error', 'Please fill in your name, date of birth, and contact details.');
+      return;
+    }
+
     setSavePressed(true);
     try {
       const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, {
+      const updatedData = {
         name,
         dob,
         contact,
         email,
         location,
         profileImage,
-      }, { merge: true });
-
+        uid: user.uid, // Ensure uid field matches document ID
+      };
+      console.log('Saving profile data to:', `users/${user.uid}`, updatedData);
+      await setDoc(userRef, updatedData, { merge: true });
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile.');
+      if (error.code === 'permission-denied') {
+        Alert.alert(
+          'Permission Error',
+          'Unable to save profile due to Firestore permissions. Please ensure Firestore rules allow access or contact support.'
+        );
+      } else {
+        Alert.alert('Error', 'Failed to update profile: ' + error.message);
+      }
     } finally {
       setSavePressed(false);
     }
@@ -81,14 +152,13 @@ export default function ProfileScreen({ navigation }) {
         if (uri) {
           await uploadImage(uri);
         } else {
-          throw new Error("Image URI not found.");
+          throw new Error('Image URI not found.');
         }
       } else {
-        console.log("Image picking canceled or no assets found.");
+        console.log('Image picking canceled or no assets found.');
       }
     } catch (error) {
-      console.error("❌ Error picking image:", error);
-      Alert.alert("Error", "Could not open image picker.");
+      console.error('Error picking image:', error);
     }
   };
 
@@ -103,6 +173,7 @@ export default function ProfileScreen({ navigation }) {
       const fileName = `profile_${user.uid}.${fileExtension || 'jpg'}`;
       const imageRef = ref(storage, `profile_pictures/${fileName}`);
 
+      console.log('Uploading image to:', `profile_pictures/${fileName}`);
       await uploadBytes(imageRef, blob);
       const downloadURL = await getDownloadURL(imageRef);
 
@@ -114,7 +185,14 @@ export default function ProfileScreen({ navigation }) {
       Alert.alert('Success', 'Profile picture updated!');
     } catch (error) {
       console.error('❌ Image upload failed:', error);
-      Alert.alert('Error', 'Image upload failed.');
+      if (error.code === 'permission-denied') {
+        Alert.alert(
+          'Permission Error',
+          'Unable to save profile image due to Firestore permissions. Please ensure Firestore rules allow access or contact support.'
+        );
+      } else {
+        Alert.alert('Error', 'Image upload failed: ' + error.message);
+      }
     }
   };
 
@@ -129,6 +207,42 @@ export default function ProfileScreen({ navigation }) {
       Alert.alert('Error', 'Failed to log out.');
     } finally {
       setLogoutPressed(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    if (!user) {
+      Alert.alert('Error', 'No user is logged in.');
+      return;
+    }
+    setIsReauthModalVisible(true);
+  };
+
+  const confirmReauthentication = async () => {
+    try {
+      if (!reauthPassword) {
+        Alert.alert('Error', 'Please enter your password.');
+        return;
+      }
+
+      const credential = EmailAuthProvider.credential(user.email, reauthPassword);
+      await reauthenticateWithCredential(user, credential);
+      await deleteUser(user);
+      Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+      navigation.navigate('LoginScreen');
+      setIsReauthModalVisible(false);
+      setReauthPassword('');
+    } catch (error) {
+      console.error('Error during re-authentication or account deletion:', error);
+      if (error.code === 'auth/wrong-password') {
+        Alert.alert('Error', 'Incorrect password. Please try again.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        Alert.alert('Error', 'Session expired. Please log in again.');
+        navigation.navigate('LoginScreen');
+        setIsReauthModalVisible(false);
+      } else {
+        Alert.alert('Error', 'Failed to delete account: ' + error.message);
+      }
     }
   };
 
@@ -158,263 +272,251 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Hey User,</Text>
-        <TouchableOpacity onPress={() => Alert.alert('Contact Us', 'Contact support at support@example.com')}>
-          <Ionicons name="mail-outline" size={24} color="#00A3AD" />
-        </TouchableOpacity>
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading profile...</Text>
       </View>
+    );
+  }
 
-      {user ? (
-        <>
-          <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.profilePic} />
-            ) : (
-              <View style={styles.profilePlaceholder}>
-                <Text style={styles.profileText}>+</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.card}>
-            <TextInput
-              style={styles.input}
-              placeholder='Name'
-              placeholderTextColor='#8A8A8A'
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder='DOB'
-              placeholderTextColor='#8A8A8A'
-              value={dob}
-              onChangeText={setDob}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder='Contact'
-              placeholderTextColor='#8A8A8A'
-              value={contact}
-              onChangeText={setContact}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder='Email'
-              placeholderTextColor='#8A8A8A'
-              value={email}
-              onChangeText={setEmail}
-            />
-            <Text style={styles.label}>Location</Text>
-            <View style={styles.locationContainer}>
-              <TextInput
-                style={[styles.input, { flex: 1, marginRight: 10 }]}
-                placeholder='Enter or fetch location'
-                placeholderTextColor='#8A8A8A'
-                value={location}
-                onChangeText={setLocation}
-              />
-              <TouchableOpacity onPress={fetchLocation} style={[styles.locationButton, styles.highlightedButton]}>
-                <Ionicons name="location-outline" size={24} color="#00A3AD" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
+  return (
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <View>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Hey {name || 'User'},</Text>
           <TouchableOpacity
-            style={[styles.button, savePressed && styles.pressedButton]}
-            onPress={handleSave}
-            onPressOut={() => setSavePressed(false)}
+            onPress={() => Alert.alert('Contact Us', 'Contact support at support@example.com')}
           >
-            <Text style={[styles.buttonText, savePressed && styles.pressedButtonText]}>Save Profile</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, logoutPressed && styles.pressedButton]}
-            onPress={handleLogout}
-            onPressOut={() => setLogoutPressed(false)}
-          >
-            <Text style={[styles.buttonText, logoutPressed && styles.pressedButtonText]}>Log Out</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <View style={styles.loginBox}>
-          <Text style={styles.notLoggedInText}>
-            You must be logged in to view your profile.
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('LoginScreen')}
-          >
-            <Text style={styles.buttonText}>Go to Login</Text>
+            <Ionicons name="mail-outline" size={24} color="#00A3AD" />
           </TouchableOpacity>
         </View>
-      )}
-    </View>
+
+        {user ? (
+          <>
+            <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
+              {profileImage ? (
+                <Image source={{ uri: profileImage }} style={styles.profilePic} />
+              ) : (
+                <View style={styles.profilePlaceholder}>
+                  <Text style={styles.profileText}>+</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.card}>
+              <TextInput
+                style={styles.input}
+                placeholder="Name"
+                placeholderTextColor="#A9A9A9"
+                value={name}
+                onChangeText={setName}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Date of Birth"
+                placeholderTextColor="#A9A9A9"
+                value={dob}
+                onChangeText={setDob}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Contact"
+                placeholderTextColor="#A9A9A9"
+                value={contact}
+                onChangeText={setContact}
+              />
+              <Text style={styles.label}>Location</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={styles.locationContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter or fetch location"
+                    placeholderTextColor="#A9A9A9"
+                    value={location}
+                    onChangeText={setLocation}
+                    editable={true}
+                  />
+                </View>
+                <TouchableOpacity onPress={fetchLocation} style={[styles.locationButton, styles.highlightedButton]}>
+                  <Ionicons name="location-outline" size={24} color="#00A3AD" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleSave}
+                disabled={savePressed}
+              >
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                disabled={logoutPressed}
+              >
+                <Text style={styles.buttonText}>Log Out</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+                <Text style={styles.buttonText}>Delete Account</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <Text style={styles.noUserText}>Please log in to view your profile.</Text>
+        )}
+      </View>
+
+      <Modal
+        visible={isReauthModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsReauthModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter your password"
+              value={reauthPassword}
+              onChangeText={setReauthPassword}
+              secureTextEntry
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={confirmReauthentication}>
+              <Text style={styles.modalButtonText}>Confirm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setIsReauthModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // White background
-    padding: 15,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0', // Light grey border for contrast
   },
   headerTitle: {
-    color: '#000000',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  notificationIcon: {
-    color: '#000000',
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   profileImageContainer: {
     alignItems: 'center',
     marginVertical: 20,
   },
   profilePic: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: '#00A3AD',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   profilePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#2A2A2A', // Grey placeholder
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#D3D3D3',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#00A3AD',
   },
   profileText: {
     fontSize: 40,
-    color: '#FFFFFF',
+    color: '#fff',
   },
   card: {
-    backgroundColor: '#F5F5F5', // Lighter grey for card
-    borderRadius: 12,
+    marginVertical: 20,
     padding: 15,
-    marginBottom: 15,
-    elevation: 2,
-  },
-  label: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 5,
-  },
-  cardTitle: {
-    color: '#00A3AD',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  cardText: {
-    color: '#000000',
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  cardButton: {
-    backgroundColor: '#D3D3D3',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  cardButtonText: {
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: '500',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   input: {
-    width: '100%',
-    height: 48,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    backgroundColor: '#F5F5F5',
-    color: '#000000',
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 15,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    marginBottom: 12,
+  buttonsContainer: {
+    marginTop: 20,
   },
-  locationButton: {
-    justifyContent: 'center',
+  saveButton: {
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
     alignItems: 'center',
-  },
-  highlightedButton: {
-    backgroundColor: '#E0F7FA',
-    borderRadius: 8,
-    padding: 10,
-  },
-  button: {
-    backgroundColor: '#D3D3D3',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-    marginVertical: 10,
-    elevation: 2,
-  },
-  buttonText: {
-    color: '#000000',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  pressedButton: {
-    backgroundColor: '#ADD8E6',
-  },
-  pressedButtonText: {
-    color: '#FFFFFF',
   },
   logoutButton: {
-    backgroundColor: '#D3D3D3',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    width: '100%',
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
     alignItems: 'center',
-    marginVertical: 10,
-    elevation: 2,
   },
-  logoutButtonText: {
-    color: '#000000',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  loginBox: {
-    width: '100%',
-    padding: 20,
-    borderRadius: 12,
-    backgroundColor: '#2A2A2A',
+  deleteButton: {
+    backgroundColor: '#FF0000',
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 50,
   },
-  notLoggedInText: {
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  noUserText: {
+    fontSize: 18,
     textAlign: 'center',
-    color: '#E0E0E0',
-    marginBottom: 15,
+    marginTop: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalInput: {
+    fontSize: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#00A3AD',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, TouchableOpacity, Text, View, Animated } from 'react-native';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from './firebase_config';
-import styles from './stylesheets/ForgotPasswordScreenStyles'; // Import styles separately
+import styles from './stylesheets/ForgotPasswordScreenStyles';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const animatedValue = new Animated.Value(0); 
+  const animatedValue = new Animated.Value(0);
 
   useEffect(() => {
     Animated.loop(
@@ -29,7 +29,7 @@ export default function ForgotPasswordScreen() {
 
   const interpolateColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#FFFFFF', '#FFFFFF'], // Light red to white
+    outputRange: ['#FFFFFF', '#FFFFFF'],
   });
 
   const handleResetPassword = () => {
@@ -43,10 +43,14 @@ export default function ForgotPasswordScreen() {
 
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        setMessage("Password reset email sent! Check your inbox.");
+        setMessage("If the email is registered, a reset link has been sent.");
       })
       .catch(error => {
-        setError(error.message);
+        if (error.code === 'auth/invalid-email') {
+          setError("Invalid email address");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
       });
   };
 
